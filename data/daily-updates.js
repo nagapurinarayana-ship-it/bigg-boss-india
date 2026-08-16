@@ -1,14 +1,23 @@
 window.BIGG_BOSS_DAILY = {
   date: "2026-08-16",
   updated: "August 16, 2026",
+  lastChecked: "2026-08-16",
   editorialRule: "Only publish names and results that are verified. Label reports/speculation clearly and never turn rumours into confirmed contestants.",
+  statusDefinitions: {
+    appeared: "Verified appearance in a pre-show, audition or selection episode.",
+    selected: "Verified selection decision; not automatically a main-house entry.",
+    onHold: "Verified participant remains in contention for a later decision or round.",
+    notSelected: "Verified selection result showing the participant did not continue.",
+    houseContestant: "Verified main-show house entry."
+  },
   editions: {
     telugu: {
       title: "Bigg Boss Telugu 10",
       preShow: "Agnipariksha 2",
       headline: "Agnipariksha 2: commoner selection is underway",
       status: "Selection/audition stage",
-      confirmedNames: [],
+      confirmedNames: ["Uppal Balu"],
+      participantStatus: [{ name: "Uppal Balu", status: "appeared", round: "Not independently verified", task: "Not independently verified", decision: "Not independently verified", next: "Not independently verified", house: false }],
       confirmed: [
         "Nagarjuna is the named host for Bigg Boss Telugu 10.",
         "Agnipariksha 2 is the commoner-selection route connected with Season 10.",
@@ -26,6 +35,12 @@ window.BIGG_BOSS_DAILY = {
       headline: "40 entered, 20 advanced — Infinity Pendant winners revealed",
       status: "Agnipareeksha underway",
       confirmedNames: ["Pranav", "Parvathy", "Shijin", "Pooja"],
+      participantStatus: [
+        { name: "Pranav", status: "selected", round: "Opening selection stage", task: "Infinity Pendant challenge", decision: "Won Infinity Pendant", next: "Selection process continues", house: false },
+        { name: "Parvathy", status: "selected", round: "Opening selection stage", task: "Infinity Pendant challenge", decision: "Won Infinity Pendant", next: "Selection process continues", house: false },
+        { name: "Shijin", status: "selected", round: "Opening selection stage", task: "Infinity Pendant challenge", decision: "Won Infinity Pendant", next: "Selection process continues", house: false },
+        { name: "Pooja", status: "appeared", round: "Selection stage", task: "Not specified in the source", decision: "Praised for determination", next: "Selection process continues", house: false }
+      ],
       confirmed: [
         "40 participants entered the opening Manichithrathazhu task.",
         "20 advanced from the opening task and continued to the next stage.",
@@ -45,6 +60,7 @@ window.BIGG_BOSS_DAILY = {
       headline: "Muniyamma grabs attention in The Common Man promo",
       status: "Pre-show begins August 16",
       confirmedNames: ["Muniyamma"],
+      participantStatus: [{ name: "Muniyamma", status: "appeared", round: "Launch-day promo", task: "Not independently verified", decision: "Not independently verified", next: "Follow challenge results", house: false }],
       confirmed: [
         "The Common Man is a 21-episode pre-launch selection show.",
         "Around 40 participants are expected to compete through physical, mental and emotional challenges.",
@@ -63,6 +79,10 @@ window.BIGG_BOSS_DAILY = {
       headline: "Agnipariksha contestant takes a major job risk",
       status: "Agnipariksha selection underway",
       confirmedNames: ["Ratna", "Kumari"],
+      participantStatus: [
+        { name: "Ratna", status: "selected", round: "Agnipariksha selection round", task: "Not specified in the source", decision: "Reported selected", next: "Selection continues", house: false },
+        { name: "Kumari", status: "selected", round: "Agnipariksha selection round", task: "Not specified in the source", decision: "Reported selected", next: "Selection continues", house: false }
+      ],
       confirmed: [
         "72-year-old Ratna and 20-year-old Kumari were reported as selected in an Agnipariksha round.",
         "Sangeetha and Vinay were reported as judges for the edition.",
@@ -80,6 +100,7 @@ window.BIGG_BOSS_DAILY = {
       headline: "Extra Jeevan Daan twist revealed",
       status: "Pre-season promotion",
       confirmedNames: ["Salman Khan"],
+      participantStatus: [{ name: "Salman Khan", status: "appeared", round: "Host/trailer", task: "Not applicable", decision: "Host", next: "Season launch", house: false }],
       confirmed: [
         "Salman Khan returns as host.",
         "The official trailer revealed a new Extra Jeevan Daan twist for contestants.",
@@ -97,6 +118,7 @@ window.BIGG_BOSS_DAILY = {
       headline: "Bigg Boss Bangla returns after a decade with Sourav Ganguly",
       status: "Pre-season announcement",
       confirmedNames: ["Sourav Ganguly"],
+      participantStatus: [{ name: "Sourav Ganguly", status: "appeared", round: "Host announcement", task: "Not applicable", decision: "Host", next: "Premiere/contestant reveal", house: false }],
       confirmed: [
         "Bigg Boss Bangla is returning for Season 3 after a ten-year hiatus.",
         "Sourav Ganguly is confirmed as the host.",
