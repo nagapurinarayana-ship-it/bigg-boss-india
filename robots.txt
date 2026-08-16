@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://bigg-boss-india.pages.dev/sitemap.xml
