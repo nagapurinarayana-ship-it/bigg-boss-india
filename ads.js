@@ -51,6 +51,6 @@
   socialFrame.style.cssText='display:block;width:100%;max-width:760px;height:140px;margin:20px auto 0;border:0;overflow:hidden';
   socialFrame.setAttribute('sandbox','allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation');
   socialFrame.setAttribute('referrerpolicy','no-referrer-when-downgrade');
-  socialFrame.srcdoc='<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{margin:0;padding:0;min-height:120px;overflow:hidden;background:transparent}</style></head><body><script src="'+socialBarSrc+'"><\\/script></body></html>';
+  socialFrame.srcdoc='<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{margin:0;padding:0;min-height:120px;overflow:hidden;background:transparent}</style></head><body><script src="'+socialBarSrc+'"><\/script></body></html>';
   host.replaceChildren(label,frame,nativeLabel,nativeFrame,socialLabel,socialFrame,smartLabel,smartLink);
 })();
