@@ -30,5 +30,14 @@
   nativeFrame.setAttribute('sandbox','allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation');
   nativeFrame.setAttribute('referrerpolicy','no-referrer-when-downgrade');
   nativeFrame.srcdoc='<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{margin:0;padding:0;overflow:auto;background:transparent}</style></head><body><script async data-cfasync="false" src="https://pl30872199.effectivecpmnetwork.com/b842cc6cf0a32d0bed447bdd2ce85a04/invoke.js"><\/script><div id="container-b842cc6cf0a32d0bed447bdd2ce85a04"></div></body></html>';
-  host.replaceChildren(label,frame,nativeLabel,nativeFrame);
+  const smartLabel=document.createElement('span');
+  smartLabel.className='ad-slot-label';
+  smartLabel.textContent='More sponsored offers';
+  const smartLink=document.createElement('a');
+  smartLink.href='https://www.effectivecpmnetwork.com/d5zrph93k4?key=ad5a5c3a9a17913680e1e0df6dc163dc';
+  smartLink.rel='sponsored nofollow noopener';
+  smartLink.target='_blank';
+  smartLink.textContent='Open sponsored offer';
+  smartLink.style.cssText='display:inline-block;margin:16px auto 4px;padding:10px 18px;border-radius:999px;background:#fff;color:#111;font-weight:700;text-decoration:none';
+  host.replaceChildren(label,frame,nativeLabel,nativeFrame,smartLabel,smartLink);
 })();
