@@ -2,6 +2,7 @@
   'use strict';
   const desktop={key:'9d555c793875e3095248cf45d3085138',width:728,height:90};
   const mobile={key:'d35ee6a7d7ffd21d33f108439621e9cd',width:300,height:250};
+  const socialBarSrc='https://pl30872198.effectivecpmnetwork.com/d2/c0/0d/d2c00d8f38a2aa73c72ed31c514b0c56.js';
   const host=document.querySelector('[data-bigg-banner]');
   if(!host||host.dataset.bannerLoaded==='1')return;
   host.dataset.bannerLoaded='1';
@@ -39,5 +40,17 @@
   smartLink.target='_blank';
   smartLink.textContent='Open sponsored offer';
   smartLink.style.cssText='display:inline-block;margin:16px auto 4px;padding:10px 18px;border-radius:999px;background:#fff;color:#111;font-weight:700;text-decoration:none';
-  host.replaceChildren(label,frame,nativeLabel,nativeFrame,smartLabel,smartLink);
+  const socialLabel=document.createElement('span');
+  socialLabel.className='ad-slot-label';
+  socialLabel.textContent='Sponsored social bar';
+  const socialFrame=document.createElement('iframe');
+  socialFrame.title='Sponsored social bar';
+  socialFrame.width='100%';
+  socialFrame.height='140';
+  socialFrame.loading='lazy';
+  socialFrame.style.cssText='display:block;width:100%;max-width:760px;height:140px;margin:20px auto 0;border:0;overflow:hidden';
+  socialFrame.setAttribute('sandbox','allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation');
+  socialFrame.setAttribute('referrerpolicy','no-referrer-when-downgrade');
+  socialFrame.srcdoc='<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{margin:0;padding:0;min-height:120px;overflow:hidden;background:transparent}</style></head><body><script src="'+socialBarSrc+'"><\\/script></body></html>';
+  host.replaceChildren(label,frame,nativeLabel,nativeFrame,socialLabel,socialFrame,smartLabel,smartLink);
 })();
