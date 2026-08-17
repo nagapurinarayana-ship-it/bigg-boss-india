@@ -29,6 +29,6 @@
   nativeFrame.style.cssText='display:block;width:100%;max-width:760px;height:280px;margin:20px auto 0;border:0;overflow:hidden';
   nativeFrame.setAttribute('sandbox','allow-scripts allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation');
   nativeFrame.setAttribute('referrerpolicy','no-referrer-when-downgrade');
-  nativeFrame.srcdoc='<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{margin:0;padding:0;overflow:auto;background:transparent}</style></head><body><script async data-cfasync="false" src="https://pl30872199.effectivecpmnetwork.com/b842cc6cf0a32d0bed447bdd2ce85a04/invoke.js"><\\/script><div id="container-b842cc6cf0a32d0bed447bdd2ce85a04"></div></body></html>';
+  nativeFrame.srcdoc='<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{margin:0;padding:0;overflow:auto;background:transparent}</style></head><body><script async data-cfasync="false" src="https://pl30872199.effectivecpmnetwork.com/b842cc6cf0a32d0bed447bdd2ce85a04/invoke.js"><\/script><div id="container-b842cc6cf0a32d0bed447bdd2ce85a04"></div></body></html>';
   host.replaceChildren(label,frame,nativeLabel,nativeFrame);
 })();
