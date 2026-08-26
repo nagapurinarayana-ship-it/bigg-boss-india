@@ -1,59 +1,6 @@
 (() => {
   'use strict';
 
-  // Keep the public homepage aligned with the official-source editorial policy.
-  // This also protects the deployed homepage when the static index cannot be replaced directly.
-  if (location.pathname === '/' || location.pathname === '') {
-    document.title = 'Bigg Boss India Today — Official Updates';
-    const desc = document.querySelector('meta[name="description"]');
-    if (desc) desc.setAttribute('content', 'Bigg Boss India updates today, August 18, 2026: official announcements, selection updates and confirmed information across six editions.');
-
-    const intro = document.querySelector('.intro');
-    if (intro) intro.textContent = 'Official announcements, selection updates and confirmed information. Unverified contestant rumours are intentionally excluded.';
-
-    const cards = Array.from(document.querySelectorAll('.cards .card'));
-    const updates = [
-      ['Agnipariksha 2 selection is underway', '<strong>JioStar official terms confirm the Agnipariksha 2 commoner-selection route.</strong> No contestant name is treated as confirmed without an official announcement.', 'See official Telugu status →'],
-      ['Official contestant confirmation pending', 'Reported names are excluded until an official broadcaster or JioStar announcement is available.', 'See official-source policy →'],
-      ['Official contestant confirmation pending', 'Only broadcaster/platform-confirmed names will be published as confirmed.', 'See Tamil status →'],
-      ['Official contestant confirmation pending', 'Media reports and social-media rumours are excluded from the confirmed list.', 'See Kannada status →'],
-      ['Official contestant confirmation pending', 'Only official broadcaster/platform announcements will be treated as confirmed.', 'See Hindi status →'],
-      ['Sourav Ganguly hosting announcement is official', '<strong>Star Jalsha officially announced Sourav Ganguly to lead Bigg Boss Bangla.</strong> The contestant list remains pending official confirmation.', 'See Bangla status →']
-    ];
-    cards.forEach((card, i) => {
-      const h2 = card.querySelector('h2');
-      const p = card.querySelector('p');
-      const read = card.querySelector('.read');
-      if (h2 && updates[i]) h2.textContent = updates[i][0];
-      if (p && updates[i]) p.innerHTML = updates[i][1];
-      if (read && updates[i]) read.textContent = updates[i][2];
-    });
-
-    const status = Array.from(document.querySelectorAll('.status-grid .status-card'));
-    const statusText = [
-      ['Agnipariksha 2 — official selection route; contestant list pending', 'OFFICIAL'],
-      ['No contestant names published as confirmed without official confirmation', 'PENDING'],
-      ['No contestant names published as confirmed without official confirmation', 'PENDING'],
-      ['No contestant names published as confirmed without official confirmation', 'PENDING'],
-      ['No contestant names published as confirmed without official confirmation', 'PENDING'],
-      ['Sourav Ganguly — official host announcement', 'OFFICIAL']
-    ];
-    status.forEach((card, i) => {
-      const spans = card.querySelectorAll('span');
-      if (spans[0] && statusText[i]) spans[0].textContent = statusText[i][0];
-      if (spans[1] && statusText[i]) spans[1].textContent = statusText[i][1];
-    });
-
-    const note = document.querySelector('.status');
-    if (note) note.innerHTML = '<strong>Editorial rule:</strong> We do not convert media reports, social posts or rumours into confirmed contestant entries. Names are added only after an official broadcaster/platform or JioStar announcement.';
-
-    const sourceNote = document.querySelector('.source-note');
-    if (sourceNote) sourceNote.innerHTML = '<strong>Last updated:</strong> August 18, 2026. Official-source updates only.';
-
-    const faq = document.querySelector('.faq');
-    if (faq) faq.innerHTML = '<details><summary>Why was Uppal Balu removed?</summary><p>His name was removed because this site now publishes contestant information only when supported by an official broadcaster/platform or official JioStar material.</p></details><details><summary>Are media-reported contestant lists shown?</summary><p>No. They are intentionally excluded until the makers publish them officially.</p></details><details><summary>Where should I check for new names?</summary><p>Open the relevant edition page. Names will be added only when official-source confirmation becomes available.</p></details>';
-  }
-
   const desktop={key:'9d555c793875e3095248cf45d3085138',width:728,height:90};
   const mobile={key:'d35ee6a7d7ffd21d33f108439621e9cd',width:300,height:250};
   const socialBarSrc='https://pl30872198.effectivecpmnetwork.com/d2/c0/0d/d2c00d8f38a2aa73c72ed31c514b0c56.js';
