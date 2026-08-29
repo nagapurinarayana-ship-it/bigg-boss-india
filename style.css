@@ -63,3 +63,11 @@ li{margin:.35rem 0}
 @media(min-width:650px){.cards{grid-template-columns:1fr 1fr}.status-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:649px){main{padding-left:16px;padding-right:16px}.header{padding-left:16px;padding-right:16px}.ad-banner{margin-left:-4px;margin-right:-4px}.ad-banner iframe{max-width:100%!important}.ad-wide{display:none!important}.data-table{display:block;overflow-x:auto;white-space:normal}.data-table table{min-width:620px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.card{transition:none}.card:hover{transform:none}}
+
+.countdown-panel{margin:22px 0;padding:20px;background:#151515;color:#fff;border:1px solid #343434;border-radius:16px;text-align:center;box-shadow:0 8px 24px #00000018}
+.countdown-panel h2{margin:2px 0 4px;color:#fff;font-size:clamp(1.35rem,5vw,1.8rem)}
+.countdown-label{margin:0;color:#ff7a73;font-size:.76rem;font-weight:900;letter-spacing:.09em;text-transform:uppercase}
+.countdown-date{margin:4px auto 12px;color:#d7d7d7;font-size:.94rem}
+.countdown-value{min-height:1.4em;color:#ff5148;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:clamp(1.5rem,7vw,2.35rem);font-weight:900;line-height:1.25;letter-spacing:-.04em}
+.countdown-status{margin:10px auto 0;color:#bcbcbc;font-size:.78rem}
+@media(max-width:420px){.countdown-panel{padding:18px 12px}.countdown-value{font-size:1.55rem;letter-spacing:-.05em}}
