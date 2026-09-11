@@ -58,7 +58,7 @@ jobs:
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html today/index.html sitemap.xml
+          git add index.html today/index.html sitemap.xml .fresh-update-state.json
           git commit -m "chore: publish fresh Bigg Boss updates [fresh-auto]"
           git push
 
