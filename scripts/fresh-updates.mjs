@@ -2,12 +2,12 @@ import { readFile, writeFile } from 'node:fs/promises'
 
 const SITE = 'https://bigg-boss-india.pages.dev'
 const EDITIONS = [
-  { key: 'hindi', label: 'Bigg Boss Hindi 20', query: 'Bigg Boss Hindi 20', href: '/topics/hindi-20/' },
-  { key: 'telugu', label: 'Bigg Boss Telugu 10', query: 'Bigg Boss Telugu 10', href: '/topics/telugu-10-agnipariksha-2/' },
-  { key: 'tamil', label: 'Bigg Boss Tamil 10', query: 'Bigg Boss Tamil 10', href: '/topics/tamil-10-common-man/' },
-  { key: 'kannada', label: 'Bigg Boss Kannada 13', query: 'Bigg Boss Kannada 13', href: '/topics/kannada-13-agnipariksha/' },
-  { key: 'malayalam', label: 'Bigg Boss Malayalam 8', query: 'Bigg Boss Malayalam 8', href: '/topics/malayalam-8-agnipareeksha/' },
-  { key: 'bangla', label: 'Bigg Boss Bangla 2026', query: 'Bigg Boss Bangla 2026', href: '/topics/bangla/' },
+  { label: 'Bigg Boss Hindi 20', query: 'Bigg Boss Hindi 20', href: '/topics/hindi-20/' },
+  { label: 'Bigg Boss Telugu 10', query: 'Bigg Boss Telugu 10', href: '/topics/telugu-10-agnipariksha-2/' },
+  { label: 'Bigg Boss Tamil 10', query: 'Bigg Boss Tamil 10', href: '/topics/tamil-10-common-man/' },
+  { label: 'Bigg Boss Kannada 13', query: 'Bigg Boss Kannada 13', href: '/topics/kannada-13-agnipariksha/' },
+  { label: 'Bigg Boss Malayalam 8', query: 'Bigg Boss Malayalam 8', href: '/topics/malayalam-8-agnipareeksha/' },
+  { label: 'Bigg Boss Bangla 2026', query: 'Bigg Boss Bangla 2026', href: '/topics/bangla/' },
 ]
 
 const now = new Date()
@@ -29,11 +29,8 @@ function tag(xml, name) {
 
 function extractItems(xml) {
   return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)].map(match => match[1]).map(item => ({
-    title: tag(item, 'title'),
-    link: tag(item, 'link'),
-    pubDate: tag(item, 'pubDate'),
-    description: tag(item, 'description'),
-    source: tag(item, 'source'),
+    title: tag(item, 'title'), link: tag(item, 'link'), pubDate: tag(item, 'pubDate'),
+    description: tag(item, 'description'), source: tag(item, 'source'),
   })).filter(item => item.title && item.link)
 }
 
@@ -41,34 +38,26 @@ async function fetchEdition(edition) {
   const url = `https://news.google.com/rss/search?q=${encodeURIComponent(`${edition.query} when:2d`)}&hl=en-IN&gl=IN&ceid=IN:en`
   const response = await fetch(url, { headers: { 'user-agent': 'BiggBossIndiaFreshUpdater/1.0' } })
   if (!response.ok) throw new Error(`${edition.label}: RSS HTTP ${response.status}`)
-  const xml = await response.text()
-  const items = extractItems(xml)
-  return { ...edition, items: items.slice(0, 4) }
+  return { ...edition, items: extractItems(await response.text()).slice(0, 4) }
 }
 
 function itemCard(edition, item) {
   const dateText = item.pubDate ? new Date(item.pubDate).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Latest'
   const source = item.source || 'News source'
-  return `<article class="card"><div class="edition">${escapeHtml(edition.label)}</div><h2>${escapeHtml(item.title)}</h2><p><strong>${escapeHtml(source)}</strong> · ${escapeHtml(dateText)}</p><p>${escapeHtml(stripCdata(item.description).replace(/<[^>]+>/g, '').slice(0, 260))}</p><p><a class="read" href="${escapeHtml(item.link)}" target="_blank" rel="noopener noreferrer nofollow">Read the original report →</a></p></article>`
+  const snippet = stripCdata(item.description).replace(/<[^>]+>/g, '').slice(0, 260)
+  return `<article class="card"><div class="edition">${escapeHtml(edition.label)}</div><h2>${escapeHtml(item.title)}</h2><p><strong>${escapeHtml(source)}</strong> · ${escapeHtml(dateText)}</p><p>${escapeHtml(snippet)}</p><p><a class="read" href="${escapeHtml(item.link)}" target="_blank" rel="noopener noreferrer nofollow">Read the original report →</a></p></article>`
 }
 
 const results = []
 for (const edition of EDITIONS) {
-  try {
-    results.push(await fetchEdition(edition))
-  } catch (error) {
-    console.warn(`WARN ${error.message}`)
-    results.push({ ...edition, items: [] })
-  }
+  try { results.push(await fetchEdition(edition)) }
+  catch (error) { console.warn(`WARN ${error.message}`); results.push({ ...edition, items: [] }) }
 }
 
 const allItems = results.flatMap(edition => edition.items.map(item => ({ ...item, edition })))
 if (!allItems.length) throw new Error('No fresh news items were returned; refusing to publish an empty update page.')
-
 allItems.sort((a, b) => new Date(b.pubDate || 0) - new Date(a.pubDate || 0))
 const latest = allItems.slice(0, 12)
-const editionJson = results.map(edition => ({ label: edition.label, href: edition.href, count: edition.items.length }))
-
 const cards = latest.map(({ edition, ...item }) => itemCard(edition, item)).join('\n')
 const dashboard = results.map(edition => {
   const item = edition.items[0]
@@ -117,6 +106,4 @@ await writeFile('index.html', homepageUpdated)
 const sitemap = await readFile('sitemap.xml', 'utf8')
 const sitemapUpdated = sitemap.replace(/(<loc>https:\/\/bigg-boss-india\.pages\.dev\/today\/<\/loc>\s*<lastmod>)[^<]+(<\/lastmod>)/i, `$1${date}$2`)
 await writeFile('sitemap.xml', sitemapUpdated)
-
-await writeFile('.fresh-update-state.json', JSON.stringify({ updatedAt: now.toISOString(), date, editions: editionJson, itemCount: latest.length }, null, 2) + '\n')
 console.log(`Published ${latest.length} fresh Bigg Boss reports across ${results.length} editions for ${displayDate}.`)
