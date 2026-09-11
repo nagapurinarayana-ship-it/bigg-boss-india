@@ -1,12 +1,22 @@
 name: SEO Quality
 
-# Keep SEO CI attached to every production update on main.
+# Keep SEO CI attached to every production update on main and run
+# the same full SEO audit three times every day for freshness.
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    # 06:10, 14:10 and 22:10 Asia/Kolkata every day.
+    # Offset from the hour reduces GitHub Actions peak-load delays.
+    - cron: '10 6 * * *'
+      timezone: 'Asia/Kolkata'
+    - cron: '10 14 * * *'
+      timezone: 'Asia/Kolkata'
+    - cron: '10 22 * * *'
+      timezone: 'Asia/Kolkata'
 
 permissions:
   contents: read
