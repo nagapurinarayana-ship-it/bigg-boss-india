@@ -1,0 +1,39 @@
+{
+  "updatedAt": "2026-09-11T07:08:42.316Z",
+  "date": "2026-09-11",
+  "editions": [
+    {
+      "label": "Bigg Boss Hindi 20",
+      "href": "/topics/hindi-20/",
+      "count": 6
+    },
+    {
+      "label": "Bigg Boss Telugu 10",
+      "href": "/topics/telugu-10-agnipariksha-2/",
+      "count": 6
+    },
+    {
+      "label": "Bigg Boss Tamil 10",
+      "href": "/topics/tamil-10-common-man/",
+      "count": 6
+    },
+    {
+      "label": "Bigg Boss Kannada 13",
+      "href": "/topics/kannada-13-agnipariksha/",
+      "count": 6
+    },
+    {
+      "label": "Bigg Boss Malayalam 8",
+      "href": "/topics/malayalam-8-agnipareeksha/",
+      "count": 6
+    },
+    {
+      "label": "Bigg Boss Bangla 2026",
+      "href": "/topics/bangla/",
+      "count": 6
+    }
+  ],
+  "itemCount": 12,
+  "editorialAnalysis": true,
+  "externalLinksDisplayed": false
+}
