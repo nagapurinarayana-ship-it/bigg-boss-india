@@ -2,68 +2,85 @@ import { readFile, writeFile } from 'node:fs/promises'
 
 const files = ['today/index.html', 'index.html']
 
-function cleanTitle(title = '') {
-  return title
-    .replace(/\s*[|–-]\s*(Times of India|The Times of India|NDTV|Deccan Chronicle|Indian Express|The Indian Express|Mid-Day|Deadline|Asianet Newsable|Filmibeat|ETV Bharat|News18|Hindustan Times).*$/i, '')
+function decode(value = '') {
+  return value.replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\s+/g, ' ').trim()
+}
+
+function cleanSource(title = '') {
+  return decode(title)
+    .replace(/\s*[|–-]\s*(Times of India|The Times of India|NDTV|Deccan Chronicle|Indian Express|The Indian Express|Mid-Day|Deadline|Asianet Newsable|Filmibeat|ETV Bharat|News18|Hindustan Times|IANS LIVE|Sakshi Post|Telegraph India|Times Now).*$/i, '')
+    .replace(/^['“”‘’]+|['“”‘’]+$/g, '')
     .replace(/\s+/g, ' ')
     .trim()
 }
 
-function analyze(title = '') {
-  const t = title.toLowerCase()
-  const subject = cleanTitle(title)
-  if (/evict|eliminat|out of the house/.test(t)) return {
-    headline: 'A sudden exit changes the house balance',
-    body: `The latest development is an eviction, and that immediately changes the numbers inside the house. ${subject} means contestants who were relying on this relationship now have to rethink where they stand.`,
-    game: `The bigger impact is strategic: one less person can strengthen one group, expose another and change the next nomination calculation. Early exits also remove a familiar vote and can force quieter contestants to become more visible.`,
-    next: `The key signal now is who moves first — who replaces the lost alliance, who becomes a new target, and whether the next nomination reflects the old rivalry or a completely new map.`
-  }
-  if (/wild.?card|entrant|enters|joins/.test(t)) return {
-    headline: 'A new entrant can disrupt the early alliance map',
-    body: `The house has received a new variable with ${subject}. The important part is not simply the arrival; it is that the newcomer enters after the first relationships have already started taking shape.`,
-    game: `That gives the entrant an unusual advantage: they can observe existing groups before choosing where to invest their loyalty. At the same time, established contestants may try to recruit them before they become independent.`,
-    next: `The first few conversations should reveal the real story — who approaches first, who tries to control the newcomer, and whether the entrant builds a separate centre of influence.`
-  }
-  if (/captain|captaincy/.test(t)) return {
-    headline: 'Captaincy starts exposing the house power structure',
-    body: `${subject} is important because captaincy is the first clear test of who can convert popularity, relationships and performance into actual authority.`,
-    game: `The captain now has to balance power with perception. Protecting a close group can strengthen an alliance, but using authority too aggressively can create a ready-made opposition for the next nomination.`,
-    next: `Watch the first difficult decision, the contestants who receive protection, and the people who feel ignored. Those reactions will show whether this captaincy creates a durable bloc or a temporary one.`
-  }
-  if (/nominat|voting|vote/.test(t)) return {
-    headline: 'Nominations are beginning to reveal the real alliances',
-    body: `${subject} moves the game from casual friendship into calculation. Once contestants have to name targets or defend people, the difference between a friendship and a strategic alliance becomes much easier to see.`,
-    game: `Repeated names matter more than one dramatic vote. A contestant who keeps appearing in danger may be isolated, while a surprising name can reveal a quiet agreement forming behind the scenes.`,
-    next: `The next pattern to watch is who changes their position, who protects the same people repeatedly, and whether the danger list starts concentrating around one emerging group.`
-  }
-  if (/fight|clash|controvers|argument|conflict|heated/.test(t)) return {
-    headline: 'A clash could become a larger house storyline',
-    body: `${subject} matters because the argument itself is only the first layer. Repeated friction can expose personality differences that later spill into tasks, nominations and alliances.`,
-    game: `If the issue remains personal, it may fade quickly. If other contestants choose sides, however, the disagreement can become a genuine power struggle and change how the house votes.`,
-    next: `The second reaction is the one to watch: who keeps returning to the issue, who tries to mediate, and who quietly uses the conflict to weaken a rival.`
-  }
-  if (/task|challenge|game/.test(t)) return {
-    headline: 'The task is revealing who can actually perform under pressure',
-    body: `${subject} gives us more information than the final score. Tasks expose who takes responsibility, who follows a group plan and who starts playing only for personal advantage when pressure rises.`,
-    game: `That performance can become currency in the next nomination cycle. A contestant who delivers for the team gains credibility, while someone who repeatedly fails or puts ego first can become an easy target.`,
-    next: `The useful signal is not only who wins. Watch who leads, who supports, who breaks discipline and who becomes influential after the task is over.`
-  }
-  if (/cyber|harass|mental health|personal struggle|suicid/.test(t)) return {
-    headline: 'A personal disclosure is changing how the contestant is being seen',
-    body: `${subject} is a different kind of Bigg Boss development because it goes beyond competition. A personal disclosure can change the way both housemates and viewers understand the person behind the gameplay.`,
-    game: `The important response is human rather than strategic. Vulnerability can deepen trust, create concern or alter relationships, but it should not be turned into manufactured drama.`,
-    next: `The meaningful signal is how the house responds afterwards — whether support becomes genuine connection and whether the contestant feels safer or more isolated.`
-  }
-  return {
-    headline: 'A fresh development is starting to shape the house',
-    body: `The latest development is ${subject}. At this stage of the season, even a small change can matter because contestants are still deciding whom to trust, challenge and protect.`,
-    game: `The real value of the update is what it changes around the event: relationships, confidence, visibility and the next decision under pressure. Those secondary effects are often more important than the headline moment itself.`,
-    next: `The next episode or house reaction should tell us whether this becomes a lasting storyline, affects nominations or simply disappears when the next task arrives.`
-  }
+function fact(title = '') {
+  const t = cleanSource(title)
+  const low = t.toLowerCase()
+  if (/charan.*(elimin|evict)|(?:elimin|evict).*charan/.test(low)) return 'Charan has been eliminated in the surprise mid-week Bigg Boss Telugu 10 eviction, leaving the house to adjust much earlier than expected.'
+  if (/manivannan.*(wild.?card|enter)|wild.?card.*manivannan/.test(low)) return 'Manivannan has entered Bigg Boss Tamil 10 as the first wild-card contestant, adding a fresh personality after the opening house dynamics have already started forming.'
+  if (/yung\s*dsa.*captain|first captain.*yung/.test(low)) return 'Yung DSA has become the first captain of Bigg Boss Hindi 20, putting him at the centre of the house power structure at a very early stage.'
+  if (/nine contestants|9 contestants|danger zone|danger/.test(low) && /kannada/.test(low)) return 'Nine contestants have been reported to be in the first-week danger zone on Bigg Boss Kannada 13, making the opening voting pressure unusually wide.'
+  if (/anjali.*(cyber|attack)|cyber.*anjali/.test(low)) return 'Anjali has opened up about a severe cyberattack ordeal on Bigg Boss Malayalam 8, bringing a deeply personal experience into the house conversation.'
+  if (/rajveer.*nandini|nandini.*rajveer/.test(low)) return 'Rajveer Dey and Nandini are at the centre of a fresh conflict in Bigg Boss Bangla, with the disagreement beginning to test the house’s early relationships.'
+  if (/chaithra rai.*elimin/.test(low)) return 'Reports of Chaithra Rai’s elimination are circulating around Bigg Boss Telugu 10, but the stronger editorial signal is the uncertainty around the early eviction picture.'
+  if (/muniyammal|savinya/.test(low) && /elimin|vot/.test(low)) return 'Muniyammal and Savinya are among the contestants facing early voting pressure in Bigg Boss Tamil 10, making the first elimination race a useful test of audience support.'
+  if (/captaincy.*rajveer|rajveer.*captaincy/.test(low)) return 'Rajveer Dey is at the centre of the second captaincy task in Bigg Boss Bangla, putting his relationships with the wider house under pressure.'
+  if (/yung\s*dsa.*kanika|kanika.*yung\s*dsa/.test(low)) return 'Yung DSA and Kanika Mann have clashed in Bigg Boss Hindi 20, and the disagreement is now a test of how quickly an early personal issue can become a wider house divide.'
+  return t
 }
 
-function decode(value = '') {
-  return value.replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\s+/g, ' ').trim()
+function analyze(title = '') {
+  const low = cleanSource(title).toLowerCase()
+  const opening = fact(title)
+  if (/evict|eliminat|out of the house/.test(low)) return {
+    headline: 'An eviction has just changed the house equation',
+    body: `${opening} At this stage, the exit matters because every remaining contestant now has to reconsider where that person fitted into the social map.`,
+    game: 'The immediate strategic question is who gains from the empty space. A group that loses a dependable vote may become exposed, while a rival can suddenly gain room to influence nominations. Early evictions often reveal which friendships were genuine and which were simply convenient.',
+    next: 'My focus now is on the reaction: who moves closer to whom, who becomes more isolated, and whether the next nomination conversation exposes a new alliance before the house has time to settle.'
+  }
+  if (/wild.?card|entrant|enters|joins/.test(low)) return {
+    headline: 'A new entrant could redraw the alliance map',
+    body: `${opening} The timing is important because the original contestants have already begun forming first impressions, friendships and rivalries.`,
+    game: 'A wild card has one advantage the originals did not: observation. The newcomer can study the existing groups before choosing where to invest, while established contestants may rush to recruit or control that new relationship.',
+    next: 'I would watch the first few conversations more closely than the first big argument — who welcomes the entrant, who tries to claim them, and who looks uncomfortable about an independent new player.'
+  }
+  if (/captain|captaincy/.test(low)) return {
+    headline: 'Captaincy is exposing who really holds power',
+    body: `${opening} The title itself is only the beginning; the more revealing part is who can build support and what happens when that authority has to be used.`,
+    game: 'A captain can strengthen an alliance through protection, but can also create a ready-made opposition through unpopular decisions. That makes the first captaincy especially valuable for reading the house hierarchy.',
+    next: 'I am watching the first difficult decision, the contestants who receive trust, the people who feel sidelined and whether the captain starts building a durable bloc or a temporary one.'
+  }
+  if (/nominat|voting|vote/.test(low)) return {
+    headline: 'The first voting pressure is revealing the real alliances',
+    body: `${opening} Once contestants have to defend someone or accept that another person is vulnerable, casual friendship starts turning into strategy.`,
+    game: 'Repeated names are more revealing than one dramatic vote. A contestant who keeps appearing in danger may be isolated, while a surprising vote can expose a quiet agreement between people who rarely look like a group.',
+    next: 'The pattern I am tracking is who changes position, who protects the same people repeatedly and whether the danger list begins concentrating around one emerging power centre.'
+  }
+  if (/fight|clash|controvers|argument|conflict|heated/.test(low)) return {
+    headline: 'A clash is starting to test the house relationships',
+    body: `${opening} The first confrontation is rarely the full story in Bigg Boss; what matters is whether the disagreement survives after the heat of the moment.`,
+    game: 'If the issue stays personal it can disappear quickly. If other contestants take sides, or if the conflict spills into tasks, food, leadership or nominations, it can become one of the house’s defining early storylines.',
+    next: 'I am watching the second reaction rather than the first shout: who keeps returning to the issue, who tries to mediate, who takes a side and who quietly uses the tension against a rival.'
+  }
+  if (/task|challenge|game/.test(low)) return {
+    headline: 'The task is showing who performs when pressure rises',
+    body: `${opening} Tasks are useful because they strip away some of the comfortable social routine and show how contestants behave when winning, losing and responsibility are suddenly visible.`,
+    game: 'A strong performance can buy credibility for the next nomination cycle. Someone who repeatedly avoids responsibility or puts personal ego above the group can also become an easy target once contestants start looking for reasons to nominate.',
+    next: 'The result is only one part of the story. I am watching who leads, who supports, who breaks discipline and who becomes more influential once the task is finished.'
+  }
+  if (/cyber|harass|mental health|personal struggle|suicid/.test(low)) return {
+    headline: 'A deeply personal moment is changing the house conversation',
+    body: `${opening} This deserves to be read first as a human story, not as manufactured Bigg Boss drama. A personal disclosure can change how housemates and viewers understand the contestant beyond the game.`,
+    game: 'The meaningful effect is likely to be relational rather than tactical. Vulnerability can create trust and support, but it can also leave someone feeling exposed. It is important not to turn a serious personal experience into a prediction or spectacle.',
+    next: 'I am watching how the other housemates respond afterwards — whether support is genuine, whether the contestant feels more connected, and whether the conversation is handled with the seriousness it deserves.'
+  }
+  return {
+    headline: 'A fresh development is beginning to shape the house',
+    body: `${opening} The useful question is not simply what happened, but what changes because it happened.`,
+    game: 'At this early stage, relationships are still fluid. Small moments can affect confidence, visibility and who gets included when the next important decision arrives.',
+    next: 'I am watching for the consequence that survives the episode: a new alliance, a changed nomination pattern, a task advantage or a contestant who suddenly becomes much more important to the house.'
+  }
 }
 
 function replaceCards(html) {
@@ -82,7 +99,9 @@ for (const path of files) {
   let html = await readFile(path, 'utf8')
   html = replaceCards(html)
   html = html.replace(/<h3>([\s\S]*?)<\/h3>/gi, (full, title) => `<h3>${analyze(decode(title)).headline}</h3>`)
+  html = html.replace(/<p>Fresh developments are checked three times daily\.[\s\S]*?<\/p>/i, '<p>Fresh Bigg Boss developments are checked three times daily. Each update is rewritten into original viewer-style analysis, with the source material used only as research input.</p>')
+  html = html.replace(/<p>Not just headlines\.[\s\S]*?<\/p>/i, '<p>This is the daily Bigg Boss read: what changed, why it matters inside the house, which relationships may be moving, and what I am watching next. The result is original analysis, not a copied news feed.</p>')
   await writeFile(path, html)
 }
 
-console.log('Editorial rendering pass completed: source headlines are no longer exposed as the visible analysis copy.')
+console.log('Reader-facing editorial pass completed: source headlines and internal analysis labels are hidden from published copy.')
