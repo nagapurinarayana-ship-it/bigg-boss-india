@@ -1,7 +1,7 @@
-name: SEO Quality
+name: Fresh Updates + SEO Quality
 
-# Keep SEO CI attached to every production update on main and run
-# the same full SEO audit three times every day for freshness.
+# Collect current Bigg Boss coverage three times daily, publish it to the
+# production branch, then run the same full SEO audit on the resulting site.
 on:
   push:
     branches: [main]
@@ -19,24 +19,48 @@ on:
       timezone: 'Asia/Kolkata'
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
-  group: seo-quality-${{ github.ref }}
+  group: fresh-updates-seo-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   seo:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Validate audit script
-        run: node --check scripts/seo-audit.mjs
+
+      - name: Validate scripts
+        run: |
+          node --check scripts/fresh-updates.mjs
+          node --check scripts/seo-audit.mjs
+
+      - name: Collect and publish fresh updates
+        if: github.event_name != 'pull_request' && !contains(github.event.head_commit.message, '[fresh-auto]')
+        run: node scripts/fresh-updates.mjs
+
+      - name: Commit published updates
+        if: github.event_name != 'pull_request' && !contains(github.event.head_commit.message, '[fresh-auto]')
+        run: |
+          if git diff --quiet; then
+            echo 'No new content changes to publish.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html today/index.html sitemap.xml
+          git commit -m "chore: publish fresh Bigg Boss updates [fresh-auto]"
+          git push
+
       - name: Audit every indexable page
         run: node scripts/seo-audit.mjs
