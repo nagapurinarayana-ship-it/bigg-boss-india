@@ -2,12 +2,12 @@ import { readFile, writeFile } from 'node:fs/promises'
 
 const SITE = 'https://bigg-boss-india.pages.dev'
 const EDITIONS = [
-  { key: 'hindi', label: 'Bigg Boss Hindi 20', query: 'Bigg Boss Hindi 20', href: '/topics/hindi-20/' },
-  { key: 'telugu', label: 'Bigg Boss Telugu 10', query: 'Bigg Boss Telugu 10', href: '/topics/telugu-10-agnipariksha-2/' },
-  { key: 'tamil', label: 'Bigg Boss Tamil 10', query: 'Bigg Boss Tamil 10', href: '/topics/tamil-10-common-man/' },
-  { key: 'kannada', label: 'Bigg Boss Kannada 13', query: 'Bigg Boss Kannada 13', href: '/topics/kannada-13-agnipariksha/' },
-  { key: 'malayalam', label: 'Bigg Boss Malayalam 8', query: 'Bigg Boss Malayalam 8', href: '/topics/malayalam-8-agnipareeksha/' },
-  { key: 'bangla', label: 'Bigg Boss Bangla 2026', query: 'Bigg Boss Bangla 2026', href: '/topics/bangla/' },
+  { key: 'hindi', label: 'Bigg Boss Hindi 20', query: 'Bigg Boss Hindi 20', href: '/topics/hindi-20/', match: /bigg\s*boss\s*(hindi\s*)?20/i },
+  { key: 'telugu', label: 'Bigg Boss Telugu 10', query: 'Bigg Boss Telugu 10', href: '/topics/telugu-10-agnipariksha-2/', match: /bigg\s*boss\s*telugu\s*10/i },
+  { key: 'tamil', label: 'Bigg Boss Tamil 10', query: 'Bigg Boss Tamil 10', href: '/topics/tamil-10-common-man/', match: /bigg\s*boss\s*tamil\s*10/i },
+  { key: 'kannada', label: 'Bigg Boss Kannada 13', query: 'Bigg Boss Kannada 13', href: '/topics/kannada-13-agnipariksha/', match: /bigg\s*boss\s*kannada\s*13/i },
+  { key: 'malayalam', label: 'Bigg Boss Malayalam 8', query: 'Bigg Boss Malayalam 8', href: '/topics/malayalam-8-agnipareeksha/', match: /bigg\s*boss\s*malayalam\s*8/i },
+  { key: 'bangla', label: 'Bigg Boss Bangla 2026', query: 'Bigg Boss Bangla 2026', href: '/topics/bangla/', match: /bigg\s*boss\s*bangla/i },
 ]
 
 const now = new Date()
@@ -20,7 +20,19 @@ function stripCdata(value = '') { return value.replace(/^<!\[CDATA\[/, '').repla
 function tag(xml, name) { const match = xml.match(new RegExp(`<${name}(?:\\s[^>]*)?>([\\s\\S]*?)</${name}>`, 'i')); return match ? stripCdata(match[1]) : '' }
 function normalize(value = '') { return value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim() }
 function extractItems(xml) { return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)].map(match => match[1]).map(item => ({ title: tag(item, 'title'), link: tag(item, 'link'), pubDate: tag(item, 'pubDate'), description: tag(item, 'description') })).filter(item => item.title && item.link) }
-async function fetchEdition(edition) { const url = `https://news.google.com/rss/search?q=${encodeURIComponent(`${edition.query} when:2d`)}&hl=en-IN&gl=IN&ceid=IN:en`; const response = await fetch(url, { headers: { 'user-agent': 'BiggBossIndiaFreshUpdater/4.0' } }); if (!response.ok) throw new Error(`${edition.label}: RSS HTTP ${response.status}`); return { ...edition, items: extractItems(await response.text()).slice(0, 8) } }
+function relevant(edition, item) {
+  const text = `${item.title} ${stripHtml(item.description)}`
+  if (!edition.match.test(text)) return false
+  const blocked = /rise\s+and\s+fall|shehnaaz\s+gill|sidharth\s+shukla|historical|years\s+ago|throwback/i
+  return !blocked.test(text)
+}
+async function fetchEdition(edition) {
+  const url = `https://news.google.com/rss/search?q=${encodeURIComponent(`${edition.query} when:2d`)}&hl=en-IN&gl=IN&ceid=IN:en`
+  const response = await fetch(url, { headers: { 'user-agent': 'BiggBossIndiaFreshUpdater/5.0' } })
+  if (!response.ok) throw new Error(`${edition.label}: RSS HTTP ${response.status}`)
+  const items = extractItems(await response.text()).filter(item => relevant(edition, item))
+  return { ...edition, items: items.slice(0, 8) }
+}
 
 let previous = { titles: [] }
 try { previous = JSON.parse(await readFile('.fresh-update-state.json', 'utf8')) } catch (_) {}
@@ -56,7 +68,7 @@ for (const edition of EDITIONS) {
 }
 
 const allItems = results.flatMap(edition => edition.items.map(item => ({ ...item, edition, isNew: !previousTitles.has(normalize(item.title)) })))
-if (!allItems.length) throw new Error('No fresh news items were returned; refusing to publish an empty update page.')
+if (!allItems.length) throw new Error('No relevant Bigg Boss news items were returned; refusing to publish an empty update page.')
 const unique = new Map()
 for (const item of allItems) {
   const key = normalize(item.title)
@@ -71,7 +83,7 @@ const cards = latest.map(({ edition, ...item }) => itemCard(edition, item)).join
 
 const dashboard = results.map(edition => {
   const item = edition.items[0]
-  if (!item) return `<section class="status"><h2>${escapeHtml(edition.label)}</h2><p>No fresh item was available in this refresh window. The edition tracker remains live.</p><p><a href="${edition.href}">Open edition tracker →</a></p></section>`
+  if (!item) return `<section class="status"><h2>${escapeHtml(edition.label)}</h2><p>No relevant fresh item was available in this refresh window. The edition tracker remains live.</p><p><a href="${edition.href}">Open edition tracker →</a></p></section>`
   const analysis = analyze(edition, item)
   return `<section class="status"><h2>${escapeHtml(edition.label)}</h2><h3>${escapeHtml(item.title)}</h3><p><strong>My read:</strong> ${escapeHtml(analysis.opening)}</p><p><strong>The bigger game:</strong> ${escapeHtml(analysis.game)}</p><p><strong>Next thing to watch:</strong> ${escapeHtml(analysis.watch)}</p><p><a href="${edition.href}">Continue following this edition →</a></p></section>`
 }).join('\n')
@@ -79,7 +91,7 @@ const dashboard = results.map(edition => {
 const todayHtml = `<!doctype html><html lang="en-IN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bigg Boss Today: ${escapeHtml(displayDate)} — Live Updates & Deep Analysis</title><meta name="description" content="Bigg Boss today, ${escapeHtml(displayDate)}: fresh Hindi 20, Telugu 10, Tamil 10, Kannada 13, Malayalam 8 and Bangla developments with daily viewer-style analysis."><meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"><link rel="canonical" href="${SITE}/today/"><meta property="og:type" content="website"><meta property="og:site_name" content="Bigg Boss India"><meta property="og:title" content="Bigg Boss Today: ${escapeHtml(displayDate)} — Live Updates & Deep Analysis"><meta property="og:description" content="Fresh Bigg Boss developments explained through original daily analysis across all six editions."><meta property="og:url" content="${SITE}/today/"><meta property="og:image" content="${SITE}/og-image.jpg"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Bigg Boss Today: ${escapeHtml(displayDate)} — Live Updates & Analysis"><meta name="twitter:image" content="${SITE}/og-image.jpg"><script type="application/ld+json">${JSON.stringify({ '@context':'https://schema.org','@type':'CollectionPage',name:`Bigg Boss Today: ${displayDate} — Live Updates & Deep Analysis`,url:`${SITE}/today/`,dateModified:date,inLanguage:'en-IN',publisher:{'@type':'Organization',name:'Bigg Boss India'},mainEntity:{'@type':'ItemList',itemListElement:latest.map((item,index)=>({'@type':'ListItem',position:index+1,name:item.title}))}})}</script><link rel="stylesheet" href="../style.css"></head><body><header class="header"><a class="brand" href="/">BIGG BOSS INDIA</a><div class="tagline">Every House. Every Day.</div></header><main><nav class="breadcrumbs"><a href="/">Bigg Boss India</a><span>›</span><span>Today</span></nav><div class="edition">Fresh developments • Deep editorial analysis</div><h1>Bigg Boss Today: ${escapeHtml(displayDate)} — live updates & analysis</h1><p class="updated"><strong>Updated: ${escapeHtml(displayDate)}</strong> · Three daily refreshes · ${newCount} new developments</p><p>Not just headlines. This is the daily Bigg Boss read: what changed, why it matters inside the house, which relationships may be moving, and what I would be watching next. Fresh reports inform the update, but the page is written as original analysis rather than a copied news feed.</p><section class="status"><h2>🔥 What is happening right now?</h2><div class="cards">${cards}</div></section><h2>My six-edition read</h2>${dashboard}<section class="status"><h2>Keep watching</h2><p>Bigg Boss changes quickly. A loud fight can disappear by tomorrow, while one quiet conversation can become the season’s biggest alliance. Come back for the next refresh to see which story actually survives.</p></section></main><footer>Independent Bigg Boss analysis site. Not affiliated with or endorsed by Bigg Boss or its broadcasters.</footer><section class="ad-slot ad-banner" data-bigg-banner aria-label="Advertisement"></section><script src="/ads.js?v=20260817-social-barsterra" defer></script></body></html>`
 
 const homepage = await readFile('index.html', 'utf8')
-const freshSection = `<section class="status" id="fresh-automatic-updates"><h2>⚡ What’s happening inside the houses?</h2><p>Fresh developments are checked three times daily. ${newCount} new developments were detected in this refresh. I’m looking at what each moment could mean for the game, not just repeating headlines.</p><div class="cards">${latest.slice(0, 8).map(({ edition, ...item }) => itemCard(edition, item)).join('\n')}</div><p><a href="/today/"><strong>Enter today’s full Bigg Boss analysis →</strong></a></p></section>`
+const freshSection = `<section class="status" id="fresh-automatic-updates"><h2>⚡ What’s happening inside the houses?</h2><p>Fresh developments are checked three times daily. ${newCount} new relevant developments were detected in this refresh. I’m looking at what each moment could mean for the game, not just repeating headlines.</p><div class="cards">${latest.slice(0, 8).map(({ edition, ...item }) => itemCard(edition, item)).join('\n')}</div><p><a href="/today/"><strong>Enter today’s full Bigg Boss analysis →</strong></a></p></section>`
 const withoutOld = homepage.replace(/<section class="status" id="fresh-automatic-updates">[\s\S]*?<\/section>/i, '')
 const insertionPoint = withoutOld.indexOf('<section class="cards"')
 const homepageUpdated = insertionPoint >= 0 ? `${withoutOld.slice(0, insertionPoint)}${freshSection}\n${withoutOld.slice(insertionPoint)}` : withoutOld
@@ -90,4 +102,4 @@ const sitemap = await readFile('sitemap.xml', 'utf8')
 await writeFile('sitemap.xml', sitemap.replace(/(<loc>https:\/\/bigg-boss-india\.pages\.dev\/today\/<\/loc>\s*<lastmod>)[^<]+(<\/lastmod>)/i, `$1${date}$2`))
 const retainedTitles = deduped.slice(0, 40).map(item => item.title)
 await writeFile('.fresh-update-state.json', JSON.stringify({ updatedAt: now.toISOString(), date, editions: editionJson, itemCount: latest.length, newCount, titles: retainedTitles, editorialAnalysis: true, externalLinksDisplayed: false }, null, 2) + '\n')
-console.log(`Published ${latest.length} fresh Bigg Boss developments, including ${newCount} newly detected items, with deep editorial analysis across ${results.length} editions for ${displayDate}.`)
+console.log(`Published ${latest.length} relevant Bigg Boss developments, including ${newCount} newly detected items, with deep editorial analysis across ${results.length} editions for ${displayDate}.`)
