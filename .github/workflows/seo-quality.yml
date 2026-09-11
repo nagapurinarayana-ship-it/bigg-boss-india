@@ -1,7 +1,7 @@
 name: Fresh Updates + SEO Quality
 
 # Collect current Bigg Boss coverage three times daily, publish it to the
-# production branch, then run the same full SEO audit on the resulting site.
+# production branch, render the analyzed result, then run the full SEO audit.
 on:
   push:
     branches: [main]
@@ -43,11 +43,16 @@ jobs:
       - name: Validate scripts
         run: |
           node --check scripts/fresh-updates.mjs
+          node --check scripts/editorial-refresh.mjs
           node --check scripts/seo-audit.mjs
 
       - name: Collect and publish fresh updates
         if: github.event_name != 'pull_request' && !contains(github.event.head_commit.message, '[fresh-auto]')
         run: node scripts/fresh-updates.mjs
+
+      - name: Render analyzed result for readers
+        if: github.event_name != 'pull_request' && !contains(github.event.head_commit.message, '[fresh-auto]')
+        run: node scripts/editorial-refresh.mjs
 
       - name: Commit published updates
         if: github.event_name != 'pull_request' && !contains(github.event.head_commit.message, '[fresh-auto]')
@@ -58,8 +63,8 @@ jobs:
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html today/index.html sitemap.xml .fresh-update-state.json
-          git commit -m "chore: publish fresh Bigg Boss updates [fresh-auto]"
+          git add index.html today/index.html sitemap.xml .fresh-update-state.json scripts/editorial-refresh.mjs
+          git commit -m "chore: publish analyzed Bigg Boss updates [fresh-auto]"
           git push
 
       - name: Audit every indexable page
