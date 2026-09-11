@@ -1,106 +1,102 @@
 window.BIGG_BOSS_DAILY = {
-  date: "2026-09-09",
-  updated: "September 9, 2026",
-  lastChecked: "2026-09-09",
-  editorialRule: "Publish current developments only when supported by an official broadcaster/platform or reputable reporting. Mark media reports and fan polls clearly; rumours remain excluded.",
+  date: "2026-09-11",
+  updated: "September 11, 2026",
+  lastChecked: "2026-09-11",
+  editorialRule: "Check all six editions on every refresh. Publish only genuinely new developments supported by official/platform information or reputable reporting. Separate confirmed facts, reported developments and unverified claims. Never promote stale stories or unrelated search results to the latest section.",
   statusDefinitions: {
     official: "Published or confirmed by the broadcaster/platform or JioStar.",
     reported: "Reported by a reputable entertainment/news outlet; not presented as an official broadcaster announcement.",
     live: "Main season has already premiered.",
-    pending: "No verified current result found in the sources checked."
+    pending: "No verified current result found in the latest check."
   },
   editions: {
     hindi: {
       title: "Bigg Boss Hindi 20",
-      headline: "LIVE — Week 1 nominations underway",
+      headline: "LIVE — Yung DSA becomes the first captain",
       status: "Live",
       host: "Salman Khan",
-      confirmedNames: [],
       current: [
-        "Episode 3 coverage confirms the season's first nomination process is complete.",
-        "Kanika Mann, Uditi Singh, Arishfa Khan and Love Gill are reported as the four Week 1 nominees.",
-        "The first captaincy task has produced Gullu, Aasif Khan and Yung DSA as contenders for the first captaincy."
+        "The latest Episode 5 reporting says Yung DSA won the captaincy task and became the house's first captain.",
+        "The episode also featured clashes involving Yung DSA and Amrapali Dubey, while Aasif Khan apologised to Kazi Tauqeer after a verbal confrontation.",
+        "Kanika remains under Week 1 eviction pressure in current reporting; this is not an official final eviction result."
       ],
-      next: "Track the official voting route and the next episode/captaincy result; keep nominee status tied to current episode confirmation.",
-      sourceName: "India Today and Navbharat Times, September 9, 2026",
-      sourceUrl: "https://www.indiatoday.in/amp/entertainment/television/story/bigg-boss-20-episode-3-four-nominated-isha-silent-on-relationship-with-badshah-2990286-2026-09-09"
+      analysis: "The first captain now has immediate strategic value. The key question is whether Yung DSA uses the position to build trust or starts creating clear opposition. The Amrapali conflict could become more important if it carries into nominations or tasks.",
+      next: "Watch the captain's first decisions, the Week 1 eviction outcome and whether the early groups harden around Yung DSA, Kazi, Amrapali and Aasif.",
+      sourceName: "Current September 11 episode reporting from Jansatta and Navbharat Times"
     },
     telugu: {
       title: "Bigg Boss Telugu 10",
       preShow: "Agnipariksha",
-      headline: "LIVE — Week 1 voting",
+      headline: "BREAKING — Charan evicted in a surprise mid-week elimination",
       status: "Live",
       host: "Nagarjuna",
-      confirmedNames: ["Rohit Naidu", "Aman Masud", "Debjani Modak", "Thrigun", "Srishti", "Shalini", "Jabardasth Naresh", "Varshini", "Charan", "Jhansi", "Temper Vamsi", "Auto Ram Prasad", "Krishnudu", "Mukesh Gowda", "Sudheer Reddy", "Chaitra Rai"],
       current: [
-        "TV9 Telugu reports 16 housemates entered the Season 10 house, with 10 celebrities and 6 commoners.",
-        "Week 1 voting is underway; TV9 Telugu reports Rohit Naidu leading the early public-vote trend and Varshini Sounderarajan in last place in that report.",
-        "These vote-trend figures are media-facing indicators, not official final eviction results."
+        "The latest episode reporting confirms commoner contestant Charan has been eliminated in the first surprise mid-week eviction.",
+        "The elimination narrowed the high-risk contest to Charan and Auto Ram Prasad, with the housemates choosing Charan to leave.",
+        "This is a reported episode result; unofficial fan-poll percentages are not being used as official voting evidence."
       ],
-      next: "Keep official eviction claims separate from community polls and media vote-trend reports; update nominees from current episode confirmation.",
-      sourceName: "TV9 Telugu, September 8, 2026",
-      sourceUrl: "https://tv9telugu.com/entertainment/tollywood/bigg-boss-10-telugu-voting-while-rohit-is-leading-the-voting-varshini-sounderarajan-is-in-the-last-position-1906963.html"
+      analysis: "Charan's early exit changes the opening-week balance immediately. Ram Prasad's survival gives his position more strategic weight, while the remaining housemates now know the season can create consequences before the normal weekend cycle.",
+      next: "Watch the house reaction, Ram Prasad's post-survival strategy, the next nomination process and whether Bigg Boss follows the mid-week shock with another format twist.",
+      sourceName: "Times of India, September 11, 2026"
     },
     tamil: {
       title: "Bigg Boss Tamil 10",
       preShow: "Common Man",
-      headline: "LIVE — First captain announced",
+      headline: "NEW — Manivannan enters as the first wild card",
       status: "Live",
       host: "Vijay Sethupathi",
-      confirmedNames: [],
       current: [
-        "Recent episode coverage reports Shathiga as the first captain of the house.",
-        "A task-related verbal clash involving Shathiga, Muniyamma and Jason has become an early major storyline."
+        "The latest September 11 report says Common Man contestant Manivannan has entered as the first wild-card contestant.",
+        "His arrival adds a new house variable just as the original contestants are beginning to form relationships and strategies.",
+        "Recent episode coverage also shows continuing task and interpersonal tension inside the house."
       ],
-      next: "Track current nominations, voting and task results as they are confirmed by the programme or reliable reporting.",
-      sourceName: "Times of India, September 9, 2026",
-      sourceUrl: "https://timesofindia.indiatimes.com/tv/news/tamil/bigg-boss-tamil-10-shathiga-muniyamma-and-jason-get-into-verbal-spat-during-task/articleshow/133951554.cms"
+      analysis: "The timing matters. A wild card can observe the original house before committing to a side, giving Manivannan an opportunity to become an independent player rather than an extension of an existing group.",
+      next: "Watch who recruits Manivannan first, who feels threatened by him and whether the newcomer immediately changes the nomination or alliance map.",
+      sourceName: "Times of India, September 11, 2026"
     },
     kannada: {
       title: "Bigg Boss Kannada 13",
       preShow: "Agniparikshe",
-      headline: "LIVE — Week 1 nominations and voting",
+      headline: "LIVE — Nine contestants reported in first-week danger zone",
       status: "Live",
       host: "Kiccha Sudeep",
-      confirmedNames: [],
       current: [
-        "First-week voting began on September 8 after the nomination process, according to Kannada Filmibeat.",
-        "Vijay Karnataka reports a major twist in which contestants inside the house were treated as safe while those remaining on the themed plane entered the nomination/danger side.",
-        "The house is using an aviation/international theme, with early gossip and conflict already developing."
+        "September 11 reporting says nine contestants are facing first-week nomination pressure.",
+        "The actual person leaving the house has not been announced in the latest report checked, so no eviction name is being presented as final.",
+        "The opening-week task and entry twists continue to shape the early house dynamics, including the reported Aasiya/Likhith developments."
       ],
-      next: "Track the official voting window, current nominated group and weekend result; do not turn media speculation into confirmed eviction data.",
-      sourceName: "Kannada Filmibeat and Vijay Karnataka, September 8–9, 2026",
-      sourceUrl: "https://kannada.filmibeat.com/news/bigg-boss-kannada-13-voting-guide-how-to-vote-on-jiohotstar-2026-011-116751.html"
+      analysis: "A nine-person danger zone makes early positioning unusually important. With so many contestants exposed, the strongest signal will come from who becomes useful to groups during tasks and who fails to create a memorable identity.",
+      next: "Watch the official voting result, task performance and whether the large nominee pool produces a surprise first eviction.",
+      sourceName: "Vijay Karnataka and current September 11 Kannada coverage"
     },
     malayalam: {
       title: "Bigg Boss Malayalam 8",
       preShow: "Agnipareeksha",
-      headline: "LIVE — historic early eviction and first-week nominations",
+      headline: "NEW — Anjali opens up about severe cyberattack ordeal",
       status: "Live",
       host: "Mohanlal",
-      confirmedNames: [],
       current: [
-        "Gayathri Suresh has been evicted on Day 2, an unusually early spot eviction in the show's history, according to Times of India.",
-        "Kerala9 reports nine contestants are in the first official nomination round and that the first-week voting phase is active.",
-        "Jaseela Parveen, Mridula Vijay and Sumesh Chandran are reported as holding immunity for the first week in the Kerala9 nomination tracker."
+        "The latest September 11 report features contestant Anjali describing severe cyber harassment connected to an earlier prank-call controversy and the emotional impact it had on her.",
+        "Earlier in the week, Gayathri Suresh became the first contestant in the show's history to be evicted on Day 2, according to Times of India.",
+        "Current episode coverage also shows task-driven clashes around food, gas and the Jail Free Pass."
       ],
-      next: "Track the official current nominee list and weekly voting result separately from media and tracker reports.",
-      sourceName: "Times of India and Kerala9, September 8–9, 2026",
-      sourceUrl: "https://timesofindia.indiatimes.com/tv/news/malayalam/bigg-boss-malayalam-8-gayathri-suresh-gets-evicted-on-the-second-day-of-the-game/articleshow/133952947.cms"
+      analysis: "The Anjali conversation is a personal storyline rather than an eviction result, so it should not be mixed with voting information. In the game itself, the early resource tasks are already revealing which contestants can handle pressure without turning every disagreement into a personal conflict.",
+      next: "Watch the next nomination and voting developments separately from personal-story coverage, and track whether the cooking/task conflicts create lasting alliances or rivalries.",
+      sourceName: "Times of India and current September 10–11 Malayalam coverage"
     },
     bangla: {
       title: "Bigg Boss Bangla 2026",
-      headline: "LIVE — ongoing daily episodes",
+      headline: "NEW — Rajveer's mind games trigger fresh Nandini conflict",
       status: "Live",
       host: "Sourav Ganguly",
-      confirmedNames: ["Sourav Ganguly"],
       current: [
-        "The Bangla edition is already underway after its August 30, 2026 launch.",
-        "No new September 9 development was sufficiently verified in the sources checked for a stronger current claim, so existing accurate information is retained rather than filling the page with speculation."
+        "The latest September 11 Bengali reporting says Rajveer Dey's behaviour and strategy have triggered a fresh dispute with Nandini.",
+        "Nandini reportedly accused Rajveer of taking advantage of her straightforward nature, while Rajveer acknowledged using different strategies to win the game.",
+        "The captaincy task is also adding pressure, with multiple contestants competing as the house dynamics shift after Rajveer's entry."
       ],
-      next: "Check current broadcaster/platform and reputable Bangla entertainment reporting for nominations, voting and elimination developments.",
-      sourceName: "JioStar official September 4 release; current-source check September 9",
-      sourceUrl: "https://www.jiostar.com/news/jiostars-bigg-boss-franchise-powers-into-the-festive-season-with-over-95-marquee-sponsors-across-six-languages/"
+      analysis: "Rajveer is quickly becoming a strategic centre of gravity. The important question is whether his mind-game reputation creates a strong alliance network or causes enough distrust that other contestants unite against him.",
+      next: "Watch the captaincy outcome, Rajveer's next alliance move and whether Nandini's conflict spreads to other housemates.",
+      sourceName: "Indian Express Bangla, September 11, 2026"
     }
   }
 };
