@@ -1,5 +1,6 @@
 name: SEO Quality
 
+# Keep SEO CI attached to every production update on main.
 on:
   push:
     branches: [main]
