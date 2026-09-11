@@ -23,12 +23,14 @@ function extractItems(xml) { return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g
 function relevant(edition, item) {
   const text = `${item.title} ${stripHtml(item.description)}`
   if (!edition.match.test(text)) return false
-  const blocked = /rise\s+and\s+fall|shehnaaz\s+gill|sidharth\s+shukla|historical|years\s+ago|throwback/i
-  return !blocked.test(text)
+  const blocked = /rise\s+and\s+fall|shehnaaz\s+gill|sidharth\s+shukla|historical|years\s+ago|throwback|contestants?\s+list|with\s+photos|stylist|fashion|looks?|ai\s+avatars?|five.?year\s+dream|favourite\s+contestant|salary|net\s+worth|sponsors?|house\s+tour|premiere\s+date|schedule|watch\s+online|horoscope|birthday/i
+  if (blocked.test(text)) return false
+  const current = /episode|today|preview|promo|evict|eliminat|nomination|nominate|voting|vote|captain|captaincy|task|fight|clash|argument|conflict|wild.?card|entrant|enters|joins|jail|immunity|power|safe|danger|high.?risk|eviction|mind.?game|cyber|harass|personal\s+(revelation|story|disclosure|struggle)|mental\s+health|controvers/i
+  return current.test(text)
 }
 async function fetchEdition(edition) {
   const url = `https://news.google.com/rss/search?q=${encodeURIComponent(`${edition.query} when:2d`)}&hl=en-IN&gl=IN&ceid=IN:en`
-  const response = await fetch(url, { headers: { 'user-agent': 'BiggBossIndiaFreshUpdater/5.0' } })
+  const response = await fetch(url, { headers: { 'user-agent': 'BiggBossIndiaFreshUpdater/6.0' } })
   if (!response.ok) throw new Error(`${edition.label}: RSS HTTP ${response.status}`)
   const items = extractItems(await response.text()).filter(item => relevant(edition, item))
   return { ...edition, items: items.slice(0, 8) }
@@ -68,7 +70,7 @@ for (const edition of EDITIONS) {
 }
 
 const allItems = results.flatMap(edition => edition.items.map(item => ({ ...item, edition, isNew: !previousTitles.has(normalize(item.title)) })))
-if (!allItems.length) throw new Error('No relevant Bigg Boss news items were returned; refusing to publish an empty update page.')
+if (!allItems.length) throw new Error('No relevant high-value Bigg Boss news items were returned; refusing to publish an empty update page.')
 const unique = new Map()
 for (const item of allItems) {
   const key = normalize(item.title)
@@ -80,26 +82,17 @@ const latest = deduped.slice(0, 18)
 const newCount = latest.filter(item => item.isNew).length
 const editionJson = results.map(edition => ({ label: edition.label, href: edition.href, count: edition.items.length }))
 const cards = latest.map(({ edition, ...item }) => itemCard(edition, item)).join('\n')
-
-const dashboard = results.map(edition => {
-  const item = edition.items[0]
-  if (!item) return `<section class="status"><h2>${escapeHtml(edition.label)}</h2><p>No relevant fresh item was available in this refresh window. The edition tracker remains live.</p><p><a href="${edition.href}">Open edition tracker →</a></p></section>`
-  const analysis = analyze(edition, item)
-  return `<section class="status"><h2>${escapeHtml(edition.label)}</h2><h3>${escapeHtml(item.title)}</h3><p><strong>My read:</strong> ${escapeHtml(analysis.opening)}</p><p><strong>The bigger game:</strong> ${escapeHtml(analysis.game)}</p><p><strong>Next thing to watch:</strong> ${escapeHtml(analysis.watch)}</p><p><a href="${edition.href}">Continue following this edition →</a></p></section>`
-}).join('\n')
-
+const dashboard = results.map(edition => { const item = edition.items[0]; if (!item) return `<section class="status"><h2>${escapeHtml(edition.label)}</h2><p>No relevant fresh item was available in this refresh window. The edition tracker remains live.</p><p><a href="${edition.href}">Open edition tracker →</a></p></section>`; const analysis = analyze(edition, item); return `<section class="status"><h2>${escapeHtml(edition.label)}</h2><h3>${escapeHtml(item.title)}</h3><p><strong>My read:</strong> ${escapeHtml(analysis.opening)}</p><p><strong>The bigger game:</strong> ${escapeHtml(analysis.game)}</p><p><strong>Next thing to watch:</strong> ${escapeHtml(analysis.watch)}</p><p><a href="${edition.href}">Continue following this edition →</a></p></section>` }).join('\n')
 const todayHtml = `<!doctype html><html lang="en-IN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bigg Boss Today: ${escapeHtml(displayDate)} — Live Updates & Deep Analysis</title><meta name="description" content="Bigg Boss today, ${escapeHtml(displayDate)}: fresh Hindi 20, Telugu 10, Tamil 10, Kannada 13, Malayalam 8 and Bangla developments with daily viewer-style analysis."><meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"><link rel="canonical" href="${SITE}/today/"><meta property="og:type" content="website"><meta property="og:site_name" content="Bigg Boss India"><meta property="og:title" content="Bigg Boss Today: ${escapeHtml(displayDate)} — Live Updates & Deep Analysis"><meta property="og:description" content="Fresh Bigg Boss developments explained through original daily analysis across all six editions."><meta property="og:url" content="${SITE}/today/"><meta property="og:image" content="${SITE}/og-image.jpg"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Bigg Boss Today: ${escapeHtml(displayDate)} — Live Updates & Analysis"><meta name="twitter:image" content="${SITE}/og-image.jpg"><script type="application/ld+json">${JSON.stringify({ '@context':'https://schema.org','@type':'CollectionPage',name:`Bigg Boss Today: ${displayDate} — Live Updates & Deep Analysis`,url:`${SITE}/today/`,dateModified:date,inLanguage:'en-IN',publisher:{'@type':'Organization',name:'Bigg Boss India'},mainEntity:{'@type':'ItemList',itemListElement:latest.map((item,index)=>({'@type':'ListItem',position:index+1,name:item.title}))}})}</script><link rel="stylesheet" href="../style.css"></head><body><header class="header"><a class="brand" href="/">BIGG BOSS INDIA</a><div class="tagline">Every House. Every Day.</div></header><main><nav class="breadcrumbs"><a href="/">Bigg Boss India</a><span>›</span><span>Today</span></nav><div class="edition">Fresh developments • Deep editorial analysis</div><h1>Bigg Boss Today: ${escapeHtml(displayDate)} — live updates & analysis</h1><p class="updated"><strong>Updated: ${escapeHtml(displayDate)}</strong> · Three daily refreshes · ${newCount} new developments</p><p>Not just headlines. This is the daily Bigg Boss read: what changed, why it matters inside the house, which relationships may be moving, and what I would be watching next. Fresh reports inform the update, but the page is written as original analysis rather than a copied news feed.</p><section class="status"><h2>🔥 What is happening right now?</h2><div class="cards">${cards}</div></section><h2>My six-edition read</h2>${dashboard}<section class="status"><h2>Keep watching</h2><p>Bigg Boss changes quickly. A loud fight can disappear by tomorrow, while one quiet conversation can become the season’s biggest alliance. Come back for the next refresh to see which story actually survives.</p></section></main><footer>Independent Bigg Boss analysis site. Not affiliated with or endorsed by Bigg Boss or its broadcasters.</footer><section class="ad-slot ad-banner" data-bigg-banner aria-label="Advertisement"></section><script src="/ads.js?v=20260817-social-barsterra" defer></script></body></html>`
-
 const homepage = await readFile('index.html', 'utf8')
 const freshSection = `<section class="status" id="fresh-automatic-updates"><h2>⚡ What’s happening inside the houses?</h2><p>Fresh developments are checked three times daily. ${newCount} new relevant developments were detected in this refresh. I’m looking at what each moment could mean for the game, not just repeating headlines.</p><div class="cards">${latest.slice(0, 8).map(({ edition, ...item }) => itemCard(edition, item)).join('\n')}</div><p><a href="/today/"><strong>Enter today’s full Bigg Boss analysis →</strong></a></p></section>`
 const withoutOld = homepage.replace(/<section class="status" id="fresh-automatic-updates">[\s\S]*?<\/section>/i, '')
 const insertionPoint = withoutOld.indexOf('<section class="cards"')
 const homepageUpdated = insertionPoint >= 0 ? `${withoutOld.slice(0, insertionPoint)}${freshSection}\n${withoutOld.slice(insertionPoint)}` : withoutOld
-
 await writeFile('today/index.html', todayHtml)
 await writeFile('index.html', homepageUpdated)
 const sitemap = await readFile('sitemap.xml', 'utf8')
 await writeFile('sitemap.xml', sitemap.replace(/(<loc>https:\/\/bigg-boss-india\.pages\.dev\/today\/<\/loc>\s*<lastmod>)[^<]+(<\/lastmod>)/i, `$1${date}$2`))
 const retainedTitles = deduped.slice(0, 40).map(item => item.title)
 await writeFile('.fresh-update-state.json', JSON.stringify({ updatedAt: now.toISOString(), date, editions: editionJson, itemCount: latest.length, newCount, titles: retainedTitles, editorialAnalysis: true, externalLinksDisplayed: false }, null, 2) + '\n')
-console.log(`Published ${latest.length} relevant Bigg Boss developments, including ${newCount} newly detected items, with deep editorial analysis across ${results.length} editions for ${displayDate}.`)
+console.log(`Published ${latest.length} high-value Bigg Boss developments, including ${newCount} newly detected items, with deep editorial analysis across ${results.length} editions for ${displayDate}.`)
