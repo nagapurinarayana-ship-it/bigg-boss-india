@@ -70,7 +70,22 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html today/index.html sitemap.xml .fresh-update-state.json scripts/editorial-refresh.mjs
           git commit -m "chore: publish analyzed Bigg Boss updates [fresh-auto]"
-          git push
+
+          # Main can move while this job is generating fresh content. Rebase
+          # and retry the push so transient non-fast-forward races do not lose
+          # the published update. Stop only after the push is accepted.
+          for attempt in 1 2 3 4 5; do
+            if git push origin HEAD:main; then
+              echo "Published successfully to main on attempt ${attempt}."
+              exit 0
+            fi
+            echo "Push attempt ${attempt} failed; refreshing main and retrying."
+            git fetch origin main
+            git rebase origin/main
+            sleep $((attempt * 2))
+          done
+          echo 'ERROR: unable to push the published update to main after 5 attempts.'
+          exit 1
 
       - name: Audit every indexable page
         run: node scripts/seo-audit.mjs
