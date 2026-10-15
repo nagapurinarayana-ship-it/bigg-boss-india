@@ -48,19 +48,19 @@ jobs:
           node --check scripts/seo-audit.mjs
 
       - name: Collect and publish fresh updates
-        if: github.event_name != 'pull_request' && !contains(github.event.head_commit.message, '[fresh-auto]')
+        if: github.event_name != 'pull_request' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[fresh-auto]'))
         run: node scripts/fresh-updates.mjs
 
       - name: Normalize homepage SEO metadata
-        if: github.event_name != 'pull_request' && !contains(github.event.head_commit.message, '[fresh-auto]')
+        if: github.event_name != 'pull_request' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[fresh-auto]'))
         run: node scripts/normalize-homepage-seo.mjs
 
       - name: Render analyzed result for readers
-        if: github.event_name != 'pull_request' && !contains(github.event.head_commit.message, '[fresh-auto]')
+        if: github.event_name != 'pull_request' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[fresh-auto]'))
         run: node scripts/editorial-refresh.mjs
 
       - name: Commit published updates
-        if: github.event_name != 'pull_request' && !contains(github.event.head_commit.message, '[fresh-auto]')
+        if: github.event_name != 'pull_request' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[fresh-auto]'))
         run: |
           if git diff --quiet; then
             echo 'No new content changes to publish.'

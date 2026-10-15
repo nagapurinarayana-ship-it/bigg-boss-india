@@ -31,6 +31,14 @@ function fact(title = '') {
 }
 
 function analyze(title = '') {
+  if (/^no official update verified$/i.test(cleanSource(title))) {
+    return {
+      headline: 'No official update verified',
+      body: 'No new update could be verified from official broadcaster or platform sources during this refresh. Third-party reports, rumours and fan polls are not treated as confirmed facts.',
+      game: 'No gameplay conclusion is drawn without an official source.',
+      next: 'Check official broadcaster/platform channels for confirmed updates.',
+    }
+  }
   const low = cleanSource(title).toLowerCase()
   const opening = fact(title)
   if (/evict|eliminat|out of the house/.test(low)) return {

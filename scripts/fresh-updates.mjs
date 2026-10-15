@@ -19,7 +19,35 @@ function stripHtml(value = '') { return value.replace(/<[^>]+>/g, ' ').replace(/
 function stripCdata(value = '') { return value.replace(/^<!\[CDATA\[/, '').replace(/\]\]>$/, '').trim() }
 function tag(xml, name) { const match = xml.match(new RegExp(`<${name}(?:\\s[^>]*)?>([\\s\\S]*?)</${name}>`, 'i')); return match ? stripCdata(match[1]) : '' }
 function normalize(value = '') { return value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim() }
-function extractItems(xml) { return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)].map(match => match[1]).map(item => ({ title: tag(item, 'title'), link: tag(item, 'link'), pubDate: tag(item, 'pubDate'), description: tag(item, 'description') })).filter(item => item.title && item.link) }
+function extractItems(xml) {
+  return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)]
+    .map(match => match[1])
+    .map(item => {
+      const source = item.match(/<source\b[^>]*\burl=["']([^"']+)["'][^>]*>([\s\S]*?)<\/source>/i)
+      return {
+        title: tag(item, 'title'),
+        link: tag(item, 'link'),
+        pubDate: tag(item, 'pubDate'),
+        description: tag(item, 'description'),
+        sourceUrl: source?.[1] || '',
+        sourceName: source ? stripHtml(source[2]) : '',
+      }
+    })
+    .filter(item => item.title && item.link)
+}
+
+const OFFICIAL_SOURCE_HOSTS = [
+  'jiohotstar.com', 'hotstar.com', 'jiostar.com', 'colorstv.com',
+]
+
+function isOfficialSource(item) {
+  try {
+    const host = new URL(item.sourceUrl).hostname.toLowerCase().replace(/^www\./, '')
+    return OFFICIAL_SOURCE_HOSTS.some(domain => host === domain || host.endsWith('.' + domain))
+  } catch (_) {
+    return false
+  }
+}
 
 function relevant(edition, item) {
   const title = stripHtml(item.title)
@@ -38,7 +66,7 @@ async function fetchEdition(edition) {
   const url = `https://news.google.com/rss/search?q=${encodeURIComponent(`${edition.query} when:2d`)}&hl=en-IN&gl=IN&ceid=IN:en`
   const response = await fetch(url, { headers: { 'user-agent': 'BiggBossIndiaFreshUpdater/7.0' } })
   if (!response.ok) throw new Error(`${edition.label}: RSS HTTP ${response.status}`)
-  const items = extractItems(await response.text()).filter(item => relevant(edition, item))
+  const items = extractItems(await response.text()).filter(item => isOfficialSource(item) && relevant(edition, item))
   return { ...edition, items: items.slice(0, 8) }
 }
 
@@ -64,6 +92,9 @@ function analyze(edition, item) {
 }
 
 function itemCard(edition, item) {
+  if (item.officialSource === false) {
+    return `<article class="card"><div class="edition">${escapeHtml(edition.label)}</div><h2>No official update verified</h2><div class="analysis"><p>We could not verify a new update from an official broadcaster or platform source during this refresh. Third-party reports, rumours and fan polls are not presented as confirmed facts.</p></div></article>`
+  }
   const analysis = analyze(edition, item)
   const freshBadge = item.isNew ? '<span class="fresh-badge">NEW</span>' : ''
   return `<article class="card">${freshBadge}<div class="edition">${escapeHtml(edition.label)}</div><h2>${escapeHtml(item.title)}</h2><div class="analysis"><p><strong>What I’m seeing:</strong> ${escapeHtml(analysis.opening)}</p><p><strong>Why this matters:</strong> ${escapeHtml(analysis.game)}</p><p><strong>What I’m watching next:</strong> ${escapeHtml(analysis.watch)}</p></div></article>`
@@ -75,8 +106,8 @@ for (const edition of EDITIONS) {
   catch (error) { console.warn(`WARN ${error.message}`); results.push({ ...edition, items: [] }) }
 }
 
-const allItems = results.flatMap(edition => edition.items.map(item => ({ ...item, edition, isNew: !previousTitles.has(normalize(item.title)) })))
-if (!allItems.length) throw new Error('No relevant high-value Bigg Boss news items were returned; refusing to publish an empty update page.')
+const allItems = results.flatMap(edition => edition.items.map(item => ({ ...item, edition, isNew: !previousTitles.has(normalize(item.title)), officialSource: true })))
+const noOfficialUpdates = allItems.length === 0
 const unique = new Map()
 for (const item of allItems) {
   const key = normalize(item.title)
@@ -84,14 +115,21 @@ for (const item of allItems) {
 }
 const deduped = [...unique.values()]
 deduped.sort((a, b) => Number(b.isNew) - Number(a.isNew) || new Date(b.pubDate || 0) - new Date(a.pubDate || 0))
-const latest = deduped.slice(0, 18)
+const latest = noOfficialUpdates
+  ? results.map(edition => ({ title: 'No official update verified', link: edition.href, pubDate: now.toISOString(), description: '', edition, isNew: false, officialSource: false }))
+  : deduped.slice(0, 18)
 const newCount = latest.filter(item => item.isNew).length
 const editionJson = results.map(edition => ({ label: edition.label, href: edition.href, count: edition.items.length }))
 const cards = latest.map(({ edition, ...item }) => itemCard(edition, item)).join('\n')
-const dashboard = results.map(edition => { const item = edition.items[0]; if (!item) return `<section class="status"><h2>${escapeHtml(edition.label)}</h2><p>No relevant fresh item was available in this refresh window. The edition tracker remains live.</p><p><a href="${edition.href}">Open edition tracker →</a></p></section>`; const analysis = analyze(edition, item); return `<section class="status"><h2>${escapeHtml(edition.label)}</h2><h3>${escapeHtml(item.title)}</h3><p><strong>My read:</strong> ${escapeHtml(analysis.opening)}</p><p><strong>The bigger game:</strong> ${escapeHtml(analysis.game)}</p><p><strong>Next thing to watch:</strong> ${escapeHtml(analysis.watch)}</p><p><a href="${edition.href}">Continue following this edition →</a></p></section>` }).join('\n')
+const dashboard = results.map(edition => {
+  const item = edition.items[0]
+  if (!item) return `<section class="status"><h2>${escapeHtml(edition.label)}</h2><p>No new official update was verified from an official broadcaster or platform source during this refresh. Unverified reports and fan polls are not treated as confirmed facts.</p><p><a href="${edition.href}">Open edition tracker →</a></p></section>`
+  const analysis = analyze(edition, item)
+  return `<section class="status"><h2>${escapeHtml(edition.label)}</h2><h3>${escapeHtml(item.title)}</h3><p><strong>My read:</strong> ${escapeHtml(analysis.opening)}</p><p><strong>The bigger game:</strong> ${escapeHtml(analysis.game)}</p><p><strong>Next thing to watch:</strong> ${escapeHtml(analysis.watch)}</p><p><a href="${edition.href}">Continue following this edition →</a></p></section>`
+}).join('\n')
 const todayHtml = `<!doctype html><html lang="en-IN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bigg Boss Today: ${escapeHtml(displayDate)} — Live Updates & Deep Analysis</title><meta name="description" content="Bigg Boss today, ${escapeHtml(displayDate)}: fresh Hindi 20, Telugu 10, Tamil 10, Kannada 13, Malayalam 8 and Bangla developments with daily viewer-style analysis."><meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"><link rel="canonical" href="${SITE}/today/"><meta property="og:type" content="website"><meta property="og:site_name" content="Bigg Boss India"><meta property="og:title" content="Bigg Boss Today: ${escapeHtml(displayDate)} — Live Updates & Deep Analysis"><meta property="og:description" content="Fresh Bigg Boss developments explained through original daily analysis across all six editions."><meta property="og:url" content="${SITE}/today/"><meta property="og:image" content="${SITE}/og-image.jpg"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Bigg Boss Today: ${escapeHtml(displayDate)} — Live Updates & Analysis"><meta name="twitter:image" content="${SITE}/og-image.jpg"><script type="application/ld+json">${JSON.stringify({ '@context':'https://schema.org','@type':'CollectionPage',name:`Bigg Boss Today: ${displayDate} — Live Updates & Deep Analysis`,url:`${SITE}/today/`,dateModified:date,inLanguage:'en-IN',publisher:{'@type':'Organization',name:'Bigg Boss India'},mainEntity:{'@type':'ItemList',itemListElement:latest.map((item,index)=>({'@type':'ListItem',position:index+1,name:item.title}))}})}</script><link rel="stylesheet" href="../style.css"></head><body><header class="header"><a class="brand" href="/">BIGG BOSS INDIA</a><div class="tagline">Every House. Every Day.</div></header><main><nav class="breadcrumbs"><a href="/">Bigg Boss India</a><span>›</span><span>Today</span></nav><div class="edition">Fresh developments • Deep editorial analysis</div><h1>Bigg Boss Today: ${escapeHtml(displayDate)} — live updates & analysis</h1><p class="updated"><strong>Updated: ${escapeHtml(displayDate)}</strong> · Three daily refreshes · ${newCount} new developments</p><p>Not just headlines. This is the daily Bigg Boss read: what changed, why it matters inside the house, which relationships may be moving, and what I would be watching next. Fresh reports inform the update, but the page is written as original analysis rather than a copied news feed.</p><section class="status"><h2>🔥 What is happening right now?</h2><div class="cards">${cards}</div></section><h2>My six-edition read</h2>${dashboard}<section class="status"><h2>Keep watching</h2><p>Bigg Boss changes quickly. A loud fight can disappear by tomorrow, while one quiet conversation can become the season’s biggest alliance. Come back for the next refresh to see which story actually survives.</p></section></main><footer>Independent Bigg Boss analysis site. Not affiliated with or endorsed by Bigg Boss or its broadcasters.</footer><section class="ad-slot ad-banner" data-bigg-banner aria-label="Advertisement"></section><script src="/ads.js?v=20260817-social-barsterra" defer></script></body></html>`
 const homepage = await readFile('index.html', 'utf8')
-const freshSection = `<section class="status" id="fresh-automatic-updates"><h2>⚡ What’s happening inside the houses?</h2><p>Fresh developments are checked three times daily. ${newCount} new relevant developments were detected in this refresh. I’m looking at what each moment could mean for the game, not just repeating headlines.</p><div class="cards">${cards}</div><p><a href="/today/"><strong>Enter today’s full Bigg Boss analysis →</strong></a></p></section>`
+const freshSection = `<section class="status" id="fresh-automatic-updates"><h2>⚡ What’s happening inside the houses?</h2><p>${noOfficialUpdates ? 'No new official broadcaster/platform update was verified in this refresh. Unverified media reports and fan polls are not presented as confirmed facts.' : `Fresh official-source developments were checked in this refresh. ${newCount} new updates were detected.`}</p><div class="cards">${cards}</div><p><a href="/today/"><strong>Enter today’s full Bigg Boss analysis →</strong></a></p></section>` 
 const start = homepage.indexOf('<section class="status" id="fresh-automatic-updates">')
 const end = homepage.indexOf('</section>', start)
 let updatedHomepage = homepage
@@ -101,7 +139,17 @@ if (start >= 0) {
   updatedHomepage = homepage.slice(0, start) + freshSection + homepage.slice(i)
 }
 updatedHomepage = updatedHomepage.replace(/<title>[^<]*<\/title>/i, `<title>Bigg Boss India 2026: ${escapeHtml(displayDate)} — Live Updates, Voting, Eliminations & Analysis</title>`)
+updatedHomepage = updatedHomepage.replace(/<p class="eyebrow">Live tracker • <time datetime="[^"]*">[^<]*<\/time><\/p>/i, `<p class="eyebrow">Live tracker • <time datetime="${date}">${escapeHtml(displayDate)}</time></p>`)
+updatedHomepage = updatedHomepage.replace(/<section class="status"><h2>🆕 Bigg Boss Today — [^<]*<\/h2>[\s\S]*?<\/section>/i, `<section class="status"><h2>🆕 Bigg Boss Today — ${escapeHtml(displayDate)}</h2><p><strong>Official-source check.</strong> New developments are only presented as confirmed when verified from official broadcaster/platform sources. If none are verified, the tracker says so rather than promoting third-party reports or fan polls.</p><p><a href="/today/">Open the latest daily tracker →</a></p></section>`)
 updatedHomepage = updatedHomepage.replace(/<meta name="description" content="[^"]*">/i, `<meta name="description" content="Bigg Boss India ${escapeHtml(displayDate)} live updates: Hindi 20, Telugu 10, Tamil 10, Kannada 13, Malayalam 8 and Bangla voting, eliminations, captaincy, wild cards and original daily analysis.">`)
+const currentSocialTitle = `Bigg Boss India 2026: ${escapeHtml(displayDate)} — Live Updates, Voting, Eliminations & Analysis`
+const currentSocialDescription = `Bigg Boss India ${escapeHtml(displayDate)}: official-source updates across Hindi, Telugu, Tamil, Kannada, Malayalam and Bangla. Unverified reports and fan polls are not presented as confirmed facts.`
+updatedHomepage = updatedHomepage.replace(/<meta property="og:title" content="[^"]*">/i, `<meta property="og:title" content="${currentSocialTitle}">`)
+updatedHomepage = updatedHomepage.replace(/<meta property="og:description" content="[^"]*">/i, `<meta property="og:description" content="${currentSocialDescription}">`)
+updatedHomepage = updatedHomepage.replace(/<meta name="twitter:title" content="[^"]*">/i, `<meta name="twitter:title" content="${currentSocialTitle}">`)
+updatedHomepage = updatedHomepage.replace(/<meta name="twitter:description" content="[^"]*">/i, `<meta name="twitter:description" content="${currentSocialDescription}">`)
+updatedHomepage = updatedHomepage.replace(/"dateModified":"[^"]*"/, `"dateModified":"${date}"`)
+updatedHomepage = updatedHomepage.replace(/"name":"Bigg Boss India 2026: [^"]*"/, `"name":"${currentSocialTitle}"`)
 await writeFile('today/index.html', todayHtml)
 await writeFile('index.html', updatedHomepage)
 await writeFile('.fresh-update-state.json', JSON.stringify({ updatedAt: now.toISOString(), titles: latest.map(item => item.title) }, null, 2) + '\n')
