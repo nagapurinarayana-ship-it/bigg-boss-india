@@ -47,5 +47,5 @@ jobs:
           grep -q 'Sponsored recommendations' ads.js
           grep -q 'More sponsored offers' ads.js
           test -s style.css
-          grep -q '\.ad-slot' style.css
-          grep -q '\.ad-banner' style.css
+          grep -Fq '.ad-slot' style.css
+          grep -Fq '.ad-banner' style.css
