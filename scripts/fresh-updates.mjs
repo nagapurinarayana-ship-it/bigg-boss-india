@@ -37,9 +37,7 @@ function extractItems(xml) {
 }
 
 const OFFICIAL_SOURCE_HOSTS = [
-  'jiohotstar.com', 'hotstar.com', 'jiostar.com',
-  'colorstv.com', 'colors.in', 'startv.com', 'starmaa.com',
-  'vijaytelevision.com', 'asianet.in', 'colorskannada.com', 'colorsbangla.com',
+  'jiohotstar.com', 'hotstar.com', 'jiostar.com', 'colorstv.com',
 ]
 
 function isOfficialSource(item) {
