@@ -40,7 +40,7 @@ jobs:
         run: |
           set -euo pipefail
           test -s ads.js
-          grep -q 'document.querySelector('\''[data-bigg-banner]'\'')' ads.js
+          grep -Fq "document.querySelector('[data-bigg-banner]')" ads.js
           grep -q 'highperformanceformat.com' ads.js
           grep -q 'effectivecpmnetwork.com' ads.js
           grep -q 'socialBarSrc' ads.js
