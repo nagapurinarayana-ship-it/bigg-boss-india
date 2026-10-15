@@ -147,6 +147,26 @@ if (start >= 0) {
   for (; i < homepage.length; i++) { if (homepage.startsWith('<section', i)) depth++; else if (homepage.startsWith('</section>', i)) { depth--; if (depth === 0) { i += '</section>'.length; break } } }
   updatedHomepage = homepage.slice(0, start) + freshSection + homepage.slice(i)
 }
+const legacySectionStart = '<section class="cards" aria-label="Latest updates across all editions">'
+const legacySectionIndex = updatedHomepage.indexOf(legacySectionStart)
+if (legacySectionIndex >= 0) {
+  let depth = 0
+  let cursor = legacySectionIndex
+  for (; cursor < updatedHomepage.length; cursor++) {
+    if (updatedHomepage.startsWith('<section', cursor)) depth++
+    else if (updatedHomepage.startsWith('</section>', cursor)) {
+      depth--
+      if (depth === 0) {
+        cursor += '</section>'.length
+        break
+      }
+    }
+  }
+  if (depth !== 0) throw new Error('Could not safely remove legacy homepage stories; refusing to publish partial output.')
+  const editionArchive = "<section class=\"status\" id=\"edition-archive\"><h2>Explore each edition</h2><p>Browse the individual trackers for each language edition. The latest-updates section above only promotes developments verified from official broadcaster or platform sources.</p><nav class=\"more-links\"><a href=\"/topics/hindi-20/\">Bigg Boss Hindi 20 →</a><a href=\"/topics/telugu-10-agnipariksha-2/\">Bigg Boss Telugu 10 →</a><a href=\"/topics/tamil-10-common-man/\">Bigg Boss Tamil 10 →</a><a href=\"/topics/kannada-13-agnipariksha/\">Bigg Boss Kannada 13 →</a><a href=\"/topics/malayalam-8-agnipareeksha/\">Bigg Boss Malayalam 8 →</a><a href=\"/topics/bangla/\">Bigg Boss Bangla →</a></nav></section>"
+  updatedHomepage = updatedHomepage.slice(0, legacySectionIndex) + editionArchive + updatedHomepage.slice(cursor)
+}
+
 updatedHomepage = updatedHomepage.replace(/<title>[^<]*<\/title>/i, `<title>Bigg Boss India 2026: ${escapeHtml(displayDate)} — Live Updates, Voting, Eliminations & Analysis</title>`)
 updatedHomepage = updatedHomepage.replace(/<p class="eyebrow">Live tracker • <time datetime="[^"]*">[^<]*<\/time><\/p>/i, `<p class="eyebrow">Live tracker • <time datetime="${date}">${escapeHtml(displayDate)}</time></p>`)
 updatedHomepage = updatedHomepage.replace(/<p class="intro">[\s\S]*?<\/p>/i, '<p class="intro">I track official broadcaster and platform updates across all six editions. Unverified reports and fan polls are not presented as confirmed facts; when no new official update is verified, the tracker says so.</p>')
