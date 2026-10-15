@@ -16,7 +16,7 @@ function count(source, regex) {
 }
 
 const homepage = await readFile('index.html', 'utf8')
-const freshUpdates = homepage.match(/<section class="status" id="fresh-automatic-updates">([\\s\\S]*?)<\\/section>/i)?.[1] || ''
+const freshUpdates = homepage.match(/<section class="status" id="fresh-automatic-updates">([\s\S]*?)<\/section>/i)?.[1] || ''
 if (!freshUpdates) fail('Homepage official-source updates section is missing')
 if (count(freshUpdates, /<article class="card">/gi) !== 6) fail('Homepage current updates must contain exactly one card per edition')
 if (homepage.includes('aria-label="Latest updates across all editions"')) fail('Legacy third-party homepage stories must not be published as latest updates')
