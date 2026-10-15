@@ -144,6 +144,14 @@ updatedHomepage = updatedHomepage.replace(/<title>[^<]*<\/title>/i, `<title>Bigg
 updatedHomepage = updatedHomepage.replace(/<p class="eyebrow">Live tracker • <time datetime="[^"]*">[^<]*<\/time><\/p>/i, `<p class="eyebrow">Live tracker • <time datetime="${date}">${escapeHtml(displayDate)}</time></p>`)
 updatedHomepage = updatedHomepage.replace(/<section class="status"><h2>🆕 Bigg Boss Today — [^<]*<\/h2>[\s\S]*?<\/section>/i, `<section class="status"><h2>🆕 Bigg Boss Today — ${escapeHtml(displayDate)}</h2><p><strong>Official-source check.</strong> New developments are only presented as confirmed when verified from official broadcaster/platform sources. If none are verified, the tracker says so rather than promoting third-party reports or fan polls.</p><p><a href="/today/">Open the latest daily tracker →</a></p></section>`)
 updatedHomepage = updatedHomepage.replace(/<meta name="description" content="[^"]*">/i, `<meta name="description" content="Bigg Boss India ${escapeHtml(displayDate)} live updates: Hindi 20, Telugu 10, Tamil 10, Kannada 13, Malayalam 8 and Bangla voting, eliminations, captaincy, wild cards and original daily analysis.">`)
+const currentSocialTitle = `Bigg Boss India 2026: ${escapeHtml(displayDate)} — Live Updates, Voting, Eliminations & Analysis`
+const currentSocialDescription = `Bigg Boss India ${escapeHtml(displayDate)}: official-source updates across Hindi, Telugu, Tamil, Kannada, Malayalam and Bangla. Unverified reports and fan polls are not presented as confirmed facts.`
+updatedHomepage = updatedHomepage.replace(/<meta property="og:title" content="[^"]*">/i, `<meta property="og:title" content="${currentSocialTitle}">`)
+updatedHomepage = updatedHomepage.replace(/<meta property="og:description" content="[^"]*">/i, `<meta property="og:description" content="${currentSocialDescription}">`)
+updatedHomepage = updatedHomepage.replace(/<meta name="twitter:title" content="[^"]*">/i, `<meta name="twitter:title" content="${currentSocialTitle}">`)
+updatedHomepage = updatedHomepage.replace(/<meta name="twitter:description" content="[^"]*">/i, `<meta name="twitter:description" content="${currentSocialDescription}">`)
+updatedHomepage = updatedHomepage.replace(/"dateModified":"[^"]*"/, `"dateModified":"${date}"`)
+updatedHomepage = updatedHomepage.replace(/"name":"Bigg Boss India 2026: [^"]*"/, `"name":"${currentSocialTitle}"`)
 await writeFile('today/index.html', todayHtml)
 await writeFile('index.html', updatedHomepage)
 await writeFile('.fresh-update-state.json', JSON.stringify({ updatedAt: now.toISOString(), titles: latest.map(item => item.title) }, null, 2) + '\n')
