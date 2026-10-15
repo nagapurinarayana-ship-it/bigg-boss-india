@@ -15,6 +15,16 @@ function count(source, regex) {
   return [...source.matchAll(regex)].length
 }
 
+const homepage = await readFile('index.html', 'utf8')
+const freshUpdates = homepage.match(/<section class="status" id="fresh-automatic-updates">([\\s\\S]*?)<\\/section>/i)?.[1] || ''
+if (!freshUpdates) fail('Homepage official-source updates section is missing')
+if (count(freshUpdates, /<article class="card">/gi) !== 6) fail('Homepage current updates must contain exactly one card per edition')
+if (homepage.includes('aria-label="Latest updates across all editions"')) fail('Legacy third-party homepage stories must not be published as latest updates')
+if (!homepage.includes('id="edition-archive"')) fail('Homepage edition navigation section is missing')
+for (const path of ['/topics/hindi-20/', '/topics/telugu-10-agnipariksha-2/', '/topics/tamil-10-common-man/', '/topics/kannada-13-agnipariksha/', '/topics/malayalam-8-agnipareeksha/', '/topics/bangla/']) {
+  if (!homepage.includes(`href="${path}"`)) fail(`Homepage edition navigation is missing ${path}`)
+}
+
 if (!urls.length) fail('sitemap.xml has no URLs')
 if (new Set(urls).size !== urls.length) fail('sitemap.xml contains duplicate URLs')
 if (urls.some(url => /[?&]/.test(url))) fail('sitemap.xml contains parameter URLs')
