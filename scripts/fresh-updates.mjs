@@ -147,6 +147,9 @@ if (start >= 0) {
   for (; i < homepage.length; i++) { if (homepage.startsWith('<section', i)) depth++; else if (homepage.startsWith('</section>', i)) { depth--; if (depth === 0) { i += '</section>'.length; break } } }
   updatedHomepage = homepage.slice(0, start) + freshSection + homepage.slice(i)
 }
+if (updatedHomepage.includes('<section class="cards" aria-label="Latest updates across all editions">')) {
+  updatedHomepage = updatedHomepage.replace(/<section class="cards" aria-label="Latest updates across all editions">[\s\S]*?<\/section>/i, "<section class=\"status\" id=\"edition-archive\"><h2>Explore each edition</h2><p>Browse the individual trackers for each language edition. The latest-updates section above only promotes developments verified from official broadcaster or platform sources.</p><nav class=\"more-links\"><a href=\"/topics/hindi-20/\">Bigg Boss Hindi 20 →</a><a href=\"/topics/telugu-10-agnipariksha-2/\">Bigg Boss Telugu 10 →</a><a href=\"/topics/tamil-10-common-man/\">Bigg Boss Tamil 10 →</a><a href=\"/topics/kannada-13-agnipariksha/\">Bigg Boss Kannada 13 →</a><a href=\"/topics/malayalam-8-agnipareeksha/\">Bigg Boss Malayalam 8 →</a><a href=\"/topics/bangla/\">Bigg Boss Bangla →</a></nav></section>")
+}
 updatedHomepage = updatedHomepage.replace(/<title>[^<]*<\/title>/i, `<title>Bigg Boss India 2026: ${escapeHtml(displayDate)} — Live Updates, Voting, Eliminations & Analysis</title>`)
 updatedHomepage = updatedHomepage.replace(/<p class="eyebrow">Live tracker • <time datetime="[^"]*">[^<]*<\/time><\/p>/i, `<p class="eyebrow">Live tracker • <time datetime="${date}">${escapeHtml(displayDate)}</time></p>`)
 updatedHomepage = updatedHomepage.replace(/<p class="intro">[\s\S]*?<\/p>/i, '<p class="intro">I track official broadcaster and platform updates across all six editions. Unverified reports and fan polls are not presented as confirmed facts; when no new official update is verified, the tracker says so.</p>')
